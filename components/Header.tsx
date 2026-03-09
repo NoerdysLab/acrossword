@@ -20,7 +20,7 @@ export default function Header() {
           transition: "background-color 0.3s ease",
         }}
       >
-        <div className="w-full max-w-2xl mx-auto px-5 sm:px-6 h-14 flex items-center justify-between">
+        <div style={{ maxWidth: "42rem", marginLeft: "auto", marginRight: "auto", width: "100%", paddingLeft: "1.25rem", paddingRight: "1.25rem", height: "3.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" className="no-underline">
             <h1
               className="text-xl tracking-tight"

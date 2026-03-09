@@ -36,7 +36,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-dvh">
         <Header />
-        <main className="w-full max-w-2xl mx-auto px-5 sm:px-6 py-10">{children}</main>
+        <main style={{ maxWidth: "42rem", marginLeft: "auto", marginRight: "auto", width: "100%", paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>{children}</main>
       </body>
     </html>
   );
