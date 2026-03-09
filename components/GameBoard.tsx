@@ -46,6 +46,21 @@ function findAnswerSpan(
   return null;
 }
 
+// Derive the answer from the completed sentence by extracting
+// the non-space characters from the answer span.
+function deriveAnswer(
+  sentence: string,
+  answerLength: number,
+  clue: string
+): string {
+  const span = findAnswerSpan(sentence, answerLength, clue);
+  if (!span) return "";
+  const middle = sentence.slice(span.start, span.end);
+  return middle
+    .replace(/\s/g, "")
+    .toUpperCase();
+}
+
 export default function GameBoard({
   day,
   clue,
@@ -73,7 +88,9 @@ export default function GameBoard({
       setSolved(true);
       setAlreadySolved(true);
       setGuessCount(entry.guesses);
-      setSolvedAnswer(entry.answer || "");
+      // Use stored answer, or derive it from the completed sentence as fallback
+      const answer = entry.answer || deriveAnswer(completedSentence, length, clue);
+      setSolvedAnswer(answer);
       setTileStates(Array(length).fill("solved"));
       setShowSentence(true);
       return;
