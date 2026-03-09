@@ -30,7 +30,7 @@ export default function Header() {
                 fontWeight: 700,
               }}
             >
-              acrossword
+              <span style={{ fontVariant: "small-caps", fontSize: "1.1em", letterSpacing: "0.02em" }}>across</span>word
             </h1>
           </Link>
 

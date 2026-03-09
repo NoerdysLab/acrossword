@@ -3,11 +3,11 @@ import Header from "@/components/Header";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "acrossword — a daily hidden word puzzle",
+  title: "ACROSSword — a daily hidden word puzzle",
   description:
     "A new clue every day. Find the word hidden across the clue text. A free daily word puzzle game.",
   openGraph: {
-    title: "acrossword — a daily hidden word puzzle",
+    title: "ACROSSword — a daily hidden word puzzle",
     description:
       "A new clue every day. Find the word hidden across the clue text.",
     type: "website",
