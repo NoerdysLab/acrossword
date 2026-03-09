@@ -319,19 +319,23 @@ export default function GameBoard({
     length, previousGuesses, buildTileStates, submitGuess, ensureTimerStarted,
   ]);
 
-  // Share handler
-  const handleShare = useCallback(async () => {
+  // Build share text
+  const buildShareText = useCallback(() => {
     const stats = getStats();
     const firstGuess = guessCount === 1;
-
     const hintWord = solvedHintsUsed === 1 ? "hint" : "hints";
-    let shareText = `ACROSSword — Day ${day}\n`;
-    shareText += firstGuess
+    let text = `ACROSSword — Day ${day}\n`;
+    text += firstGuess
       ? `🟦 Solved in 1 guess with ${solvedHintsUsed} ${hintWord}\n`
       : `🟦 Solved with ${solvedHintsUsed} ${hintWord}\n`;
-    shareText += `Streak: ${stats.currentStreak}\n`;
-    shareText += `ACROSSword.org`;
+    text += `Streak: ${stats.currentStreak}\n`;
+    text += `ACROSSword.org`;
+    return text;
+  }, [day, guessCount, solvedHintsUsed]);
 
+  // Share handler (native share sheet)
+  const handleShare = useCallback(async () => {
+    const shareText = buildShareText();
     const canShare =
       typeof navigator !== "undefined" &&
       typeof navigator.share === "function" &&
@@ -342,9 +346,10 @@ export default function GameBoard({
       try {
         await navigator.share({ text: shareText });
       } catch {
-        // User cancelled or share failed — do nothing
+        // User cancelled or share failed
       }
     } else {
+      // Fallback to copy
       try {
         await navigator.clipboard.writeText(shareText);
         setToastMessage("Copied!");
@@ -353,7 +358,18 @@ export default function GameBoard({
         // Clipboard failed
       }
     }
-  }, [day, guessCount, solvedHintsUsed]);
+  }, [buildShareText]);
+
+  // Copy handler
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(buildShareText());
+      setToastMessage("Copied!");
+      setToastVisible(true);
+    } catch {
+      // Clipboard failed
+    }
+  }, [buildShareText]);
 
   // Build display letters: hints + typed letters
   const displayLetters = solved
@@ -525,19 +541,38 @@ export default function GameBoard({
               ? "Got it in 1 guess!"
               : `Got it in ${guessCount} guesses`}
           </p>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleShare();
-            }}
-            className="mt-3 px-5 py-2 rounded-lg text-sm font-semibold transition-colors"
-            style={{
-              backgroundColor: "var(--accent)",
-              color: "#ffffff",
-            }}
-          >
-            Share
-          </button>
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShare();
+              }}
+              className="px-5 py-2 rounded-lg text-sm font-semibold transition-colors"
+              style={{
+                backgroundColor: "var(--accent)",
+                color: "#ffffff",
+              }}
+            >
+              Share
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopy();
+              }}
+              className="p-2 rounded-lg transition-colors"
+              style={{
+                backgroundColor: "var(--bg-secondary)",
+                color: "var(--text)",
+              }}
+              aria-label="Copy to clipboard"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
