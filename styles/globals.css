@@ -144,18 +144,6 @@ body > main {
   animation: sentence-reveal 0.5s ease-out forwards;
 }
 
-/* Individual letter landing with bounce/jiggle */
-@keyframes letter-land {
-  0% { transform: scale(1.4) translateY(-8px); opacity: 0; }
-  30% { transform: scale(1.15) translateY(2px); opacity: 1; }
-  50% { transform: scale(0.95) translateY(-1px); }
-  70% { transform: scale(1.05) translateY(0); }
-  100% { transform: scale(1) translateY(0); }
-}
-
-.letter-land {
-  animation: letter-land 0.5s ease-out both;
-}
 
 /* Confetti particle */
 .confetti-piece {

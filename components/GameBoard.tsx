@@ -20,14 +20,15 @@ interface GameBoardProps {
 type TileState = "empty" | "typing" | "wrong" | "correct" | "solved";
 
 // Find where the answer letters span in the completed sentence.
-// Uses the clue prefix (text before _ _ _ _ _) to locate the start position,
-// then counts forward through `answerLength` non-space characters.
-function findAnswerSpan(sentence: string, answerLength: number, clue: string) {
+function findAnswerSpan(
+  sentence: string,
+  answerLength: number,
+  clue: string
+) {
   const uscoreIdx = clue.indexOf("_ _ _ _ _");
   if (uscoreIdx === -1) return null;
 
   const prefixLen = clue.slice(0, uscoreIdx).length;
-
   let end = prefixLen;
   let consumed = 0;
   while (end < sentence.length && consumed < answerLength) {
@@ -57,17 +58,12 @@ export default function GameBoard({
   );
   const [previousGuesses, setPreviousGuesses] = useState<string[]>([]);
   const [solved, setSolved] = useState(false);
+  const [solvedAnswer, setSolvedAnswer] = useState("");
   const [guessCount, setGuessCount] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showSentence, setShowSentence] = useState(false);
   const [alreadySolved, setAlreadySolved] = useState(false);
-  // Animation phases: "playing" | "correct" | "flying" | "landed"
-  const [phase, setPhase] = useState<
-    "playing" | "correct" | "flying" | "landed"
-  >("playing");
   const inputRef = useRef<HTMLInputElement>(null);
-  const tileRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const targetRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const [flyStyles, setFlyStyles] = useState<React.CSSProperties[]>([]);
 
   // Load saved state
   useEffect(() => {
@@ -77,7 +73,9 @@ export default function GameBoard({
       setSolved(true);
       setAlreadySolved(true);
       setGuessCount(entry.guesses);
-      setPhase("landed");
+      setSolvedAnswer(entry.answer || "");
+      setTileStates(Array(length).fill("solved"));
+      setShowSentence(true);
       return;
     }
 
@@ -115,47 +113,6 @@ export default function GameBoard({
     [solved, length]
   );
 
-  // Measure tile + target positions and set CSS transforms to animate tiles flying up
-  const startFlyAnimation = useCallback(() => {
-    setPhase("flying");
-
-    // Double rAF to ensure the sentence targets are rendered and measured
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const styles: React.CSSProperties[] = [];
-        for (let i = 0; i < length; i++) {
-          const tile = tileRefs.current[i];
-          const target = targetRefs.current[i];
-          if (tile && target) {
-            const tileRect = tile.getBoundingClientRect();
-            const targetRect = target.getBoundingClientRect();
-            const dx =
-              targetRect.left +
-              targetRect.width / 2 -
-              (tileRect.left + tileRect.width / 2);
-            const dy =
-              targetRect.top +
-              targetRect.height / 2 -
-              (tileRect.top + tileRect.height / 2);
-            styles.push({
-              transform: `translate(${dx}px, ${dy}px) scale(0.4)`,
-              opacity: 0,
-              transition: `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 80}ms`,
-            });
-          } else {
-            styles.push({});
-          }
-        }
-        setFlyStyles(styles);
-
-        // After all letters land, switch to final state
-        setTimeout(() => {
-          setPhase("landed");
-        }, 600 + length * 80 + 150);
-      });
-    });
-  }, [length]);
-
   const handleSubmit = useCallback(
     async (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key !== "Enter" || solved) return;
@@ -173,15 +130,15 @@ export default function GameBoard({
           const totalGuesses = previousGuesses.length + 1;
           setGuessCount(totalGuesses);
           setSolved(true);
+          setSolvedAnswer(currentGuess.toUpperCase());
           setTileStates(Array(length).fill("correct"));
           setShowConfetti(true);
-          markSolved(day, totalGuesses);
+          markSolved(day, totalGuesses, currentGuess);
           setCurrentGame(null);
-          setPhase("correct");
 
-          // After flip completes, start flying
-          setTimeout(() => startFlyAnimation(), 700);
-          setTimeout(() => setShowConfetti(false), 3000);
+          // After tile flip, show the completed sentence
+          setTimeout(() => setShowSentence(true), 800);
+          setTimeout(() => setShowConfetti(false), 2500);
         } else {
           setTileStates(Array(length).fill("wrong"));
           const newGuesses = [
@@ -201,52 +158,31 @@ export default function GameBoard({
         setTileStates(Array(length).fill("empty"));
       }
     },
-    [currentGuess, day, length, previousGuesses, solved, startFlyAnimation]
+    [currentGuess, day, length, previousGuesses, solved]
   );
 
-  const displayLetters = solved ? currentGuess || "     " : currentGuess;
+  // Letters to display in tiles: saved answer when solved, current guess while playing
+  const displayLetters = solved ? solvedAnswer || currentGuess : currentGuess;
+
   const answerSpan = findAnswerSpan(completedSentence, length, clue);
 
-  // Completed sentence with individual letter spans as fly targets
-  const renderSentenceWithTargets = () => {
+  // Completed sentence with highlighted answer portion
+  const renderCompletedSentence = () => {
     if (!answerSpan) return <span>{completedSentence}</span>;
 
     const before = completedSentence.slice(0, answerSpan.start);
-    const middle = completedSentence.slice(answerSpan.start, answerSpan.end);
+    const highlighted = completedSentence.slice(
+      answerSpan.start,
+      answerSpan.end
+    );
     const after = completedSentence.slice(answerSpan.end);
-
-    let letterIdx = 0;
-    const middleElements = middle.split("").map((char, i) => {
-      if (char === " ") {
-        return <span key={`sp-${i}`}> </span>;
-      }
-      const idx = letterIdx;
-      letterIdx++;
-      const isLanded = phase === "landed";
-      return (
-        <span
-          key={`l-${i}`}
-          ref={(el) => {
-            targetRefs.current[idx] = el;
-          }}
-          className={isLanded && !alreadySolved ? "letter-land" : ""}
-          style={{
-            display: "inline-block",
-            color: "var(--accent)",
-            fontWeight: 700,
-            animationDelay:
-              isLanded && !alreadySolved ? `${idx * 80}ms` : undefined,
-          }}
-        >
-          {char}
-        </span>
-      );
-    });
 
     return (
       <>
         <span>{before}</span>
-        <span>{middleElements}</span>
+        <span style={{ color: "var(--accent)", fontWeight: 700 }}>
+          {highlighted}
+        </span>
         <span>{after}</span>
       </>
     );
@@ -264,10 +200,6 @@ export default function GameBoard({
       )
     );
 
-  const showTiles =
-    phase === "playing" || phase === "correct" || phase === "flying";
-  const showSentenceText = phase === "flying" || phase === "landed";
-
   return (
     <div
       className="flex flex-col items-center gap-8 w-full"
@@ -281,7 +213,7 @@ export default function GameBoard({
         Puzzle #{day}
       </div>
 
-      {/* Clue / Completed Sentence */}
+      {/* Clue or Completed Sentence */}
       <div
         className="text-lg sm:text-xl text-center leading-relaxed max-w-lg px-4"
         style={{
@@ -290,13 +222,12 @@ export default function GameBoard({
           minHeight: "3em",
         }}
       >
-        {showSentenceText ? (
+        {showSentence ? (
           <span
-            className={
-              phase === "landed" && !alreadySolved ? "sentence-reveal" : ""
-            }
+            className={!alreadySolved ? "sentence-reveal" : ""}
+            style={{ display: "inline-block" }}
           >
-            {renderSentenceWithTargets()}
+            {renderCompletedSentence()}
           </span>
         ) : (
           <span
@@ -308,49 +239,22 @@ export default function GameBoard({
         )}
       </div>
 
-      {/* Tiles — visible while playing, during flip, and during fly */}
-      {showTiles && (
-        <div
-          className="relative flex gap-2 animate-fade-in-up"
-          style={{ animationDelay: "100ms" }}
-        >
-          {Array.from({ length }).map((_, i) => (
-            <div
-              key={i}
-              ref={(el) => {
-                tileRefs.current[i] = el;
-              }}
-              style={phase === "flying" && flyStyles[i] ? flyStyles[i] : {}}
-            >
-              <Tile
-                index={i}
-                letter={displayLetters[i] || ""}
-                state={tileStates[i]}
-                animationDelay={tileStates[i] === "correct" ? i * 100 : 0}
-              />
-            </div>
-          ))}
-          {showConfetti && <Confetti />}
-        </div>
-      )}
-
-      {/* Solved tiles — always shown in landed state */}
-      {phase === "landed" && (
-        <div
-          className={`flex gap-2 ${alreadySolved ? "" : "animate-fade-in-up"}`}
-          style={{ animationDelay: alreadySolved ? "0ms" : "100ms" }}
-        >
-          {Array.from({ length }).map((_, i) => (
-            <Tile
-              key={i}
-              index={i}
-              letter={displayLetters[i] || ""}
-              state="solved"
-              animationDelay={0}
-            />
-          ))}
-        </div>
-      )}
+      {/* Tiles — always visible */}
+      <div
+        className="relative flex gap-2 animate-fade-in-up"
+        style={{ animationDelay: "100ms" }}
+      >
+        {Array.from({ length }).map((_, i) => (
+          <Tile
+            key={i}
+            index={i}
+            letter={displayLetters[i] || ""}
+            state={tileStates[i]}
+            animationDelay={tileStates[i] === "correct" ? i * 100 : 0}
+          />
+        ))}
+        {showConfetti && <Confetti />}
+      </div>
 
       {/* Hidden input */}
       {!solved && (
@@ -386,10 +290,10 @@ export default function GameBoard({
         )}
 
       {/* Success message */}
-      {phase === "landed" && (
+      {solved && showSentence && (
         <div
           className={`text-center ${alreadySolved ? "" : "animate-fade-in-up"}`}
-          style={{ animationDelay: alreadySolved ? "0ms" : "300ms" }}
+          style={{ animationDelay: alreadySolved ? "0ms" : "200ms" }}
         >
           <p className="text-lg font-bold" style={{ color: "var(--accent)" }}>
             Solved!

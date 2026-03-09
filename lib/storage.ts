@@ -4,6 +4,7 @@ export interface SolvedEntry {
   solved: boolean;
   guesses: number;
   date: string;
+  answer?: string;
 }
 
 export interface Stats {
@@ -79,12 +80,13 @@ export function setTheme(theme: "light" | "dark") {
   localStorage.setItem("acrossword-theme", theme);
 }
 
-export function markSolved(day: number, guessCount: number) {
+export function markSolved(day: number, guessCount: number, answer: string) {
   const solved = getSolvedData();
   solved[String(day)] = {
     solved: true,
     guesses: guessCount,
     date: new Date().toISOString(),
+    answer: answer.toUpperCase(),
   };
   setSolvedData(solved);
 
