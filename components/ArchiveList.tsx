@@ -20,7 +20,7 @@ export default function ArchiveList({ todayDay, puzzles }: ArchiveListProps) {
   const isPlayable = (day: number) => day >= todayDay - PLAYABLE_WINDOW && day <= todayDay;
 
   return (
-    <div className="w-full max-w-lg mx-auto space-y-2">
+    <div className="w-full space-y-3">
       {puzzles
         .sort((a, b) => b.day - a.day)
         .map((puzzle) => {
@@ -30,8 +30,8 @@ export default function ArchiveList({ todayDay, puzzles }: ArchiveListProps) {
 
           const content = (
             <div
-              className={`rounded-xl p-4 transition-all ${
-                playable ? "cursor-pointer" : ""
+              className={`rounded-xl px-5 py-4 transition-all ${
+                playable ? "cursor-pointer hover:scale-[1.01]" : ""
               }`}
               style={{
                 backgroundColor: "var(--bg-secondary)",

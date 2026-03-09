@@ -19,6 +19,32 @@ interface GameBoardProps {
 
 type TileState = "empty" | "typing" | "wrong" | "correct" | "solved";
 
+// Find where the answer letters span in the completed sentence.
+// Uses the clue prefix (text before _ _ _ _ _) to locate the start position,
+// then counts forward through `answerLength` non-space characters.
+function findAnswerSpan(sentence: string, answerLength: number, clue: string) {
+  const uscoreIdx = clue.indexOf("_ _ _ _ _");
+  if (uscoreIdx === -1) return null;
+
+  const prefixLen = clue.slice(0, uscoreIdx).length;
+
+  let end = prefixLen;
+  let consumed = 0;
+  while (end < sentence.length && consumed < answerLength) {
+    if (sentence[end] === " ") {
+      end++;
+      continue;
+    }
+    consumed++;
+    end++;
+  }
+
+  if (consumed === answerLength) {
+    return { start: prefixLen, end };
+  }
+  return null;
+}
+
 export default function GameBoard({
   day,
   clue,
@@ -33,9 +59,15 @@ export default function GameBoard({
   const [solved, setSolved] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showSentence, setShowSentence] = useState(false);
   const [alreadySolved, setAlreadySolved] = useState(false);
+  // Animation phases: "playing" | "correct" | "flying" | "landed"
+  const [phase, setPhase] = useState<
+    "playing" | "correct" | "flying" | "landed"
+  >("playing");
   const inputRef = useRef<HTMLInputElement>(null);
+  const tileRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const targetRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [flyStyles, setFlyStyles] = useState<React.CSSProperties[]>([]);
 
   // Load saved state
   useEffect(() => {
@@ -45,7 +77,7 @@ export default function GameBoard({
       setSolved(true);
       setAlreadySolved(true);
       setGuessCount(entry.guesses);
-      setShowSentence(true);
+      setPhase("landed");
       return;
     }
 
@@ -83,6 +115,47 @@ export default function GameBoard({
     [solved, length]
   );
 
+  // Measure tile + target positions and set CSS transforms to animate tiles flying up
+  const startFlyAnimation = useCallback(() => {
+    setPhase("flying");
+
+    // Double rAF to ensure the sentence targets are rendered and measured
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const styles: React.CSSProperties[] = [];
+        for (let i = 0; i < length; i++) {
+          const tile = tileRefs.current[i];
+          const target = targetRefs.current[i];
+          if (tile && target) {
+            const tileRect = tile.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const dx =
+              targetRect.left +
+              targetRect.width / 2 -
+              (tileRect.left + tileRect.width / 2);
+            const dy =
+              targetRect.top +
+              targetRect.height / 2 -
+              (tileRect.top + tileRect.height / 2);
+            styles.push({
+              transform: `translate(${dx}px, ${dy}px) scale(0.4)`,
+              opacity: 0,
+              transition: `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 80}ms`,
+            });
+          } else {
+            styles.push({});
+          }
+        }
+        setFlyStyles(styles);
+
+        // After all letters land, switch to final state
+        setTimeout(() => {
+          setPhase("landed");
+        }, 600 + length * 80 + 150);
+      });
+    });
+  }, [length]);
+
   const handleSubmit = useCallback(
     async (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key !== "Enter" || solved) return;
@@ -104,12 +177,17 @@ export default function GameBoard({
           setShowConfetti(true);
           markSolved(day, totalGuesses);
           setCurrentGame(null);
-          // After tile flip animation, transition to completed sentence
-          setTimeout(() => setShowSentence(true), 1200);
-          setTimeout(() => setShowConfetti(false), 2500);
+          setPhase("correct");
+
+          // After flip completes, start flying
+          setTimeout(() => startFlyAnimation(), 700);
+          setTimeout(() => setShowConfetti(false), 3000);
         } else {
           setTileStates(Array(length).fill("wrong"));
-          const newGuesses = [...previousGuesses, currentGuess.toUpperCase()];
+          const newGuesses = [
+            ...previousGuesses,
+            currentGuess.toUpperCase(),
+          ];
           setPreviousGuesses(newGuesses);
           setCurrentGame({ day, guesses: newGuesses });
 
@@ -123,113 +201,76 @@ export default function GameBoard({
         setTileStates(Array(length).fill("empty"));
       }
     },
-    [currentGuess, day, length, previousGuesses, solved]
+    [currentGuess, day, length, previousGuesses, solved, startFlyAnimation]
   );
 
   const displayLetters = solved ? currentGuess || "     " : currentGuess;
+  const answerSpan = findAnswerSpan(completedSentence, length, clue);
 
-  // Render the completed sentence with the hidden word highlighted
-  const renderCompletedSentence = () => {
-    const sentenceLower = completedSentence.toLowerCase();
-    // Get the answer from the puzzle data — we can derive it from the completedSentence
-    // by finding 5 consecutive letter chars (ignoring spaces) that match across word boundaries
-    // But we actually have the answer in displayLetters or can parse from clue
-    // Use a simpler approach: find the answer span using the clue's prefix/suffix
+  // Completed sentence with individual letter spans as fly targets
+  const renderSentenceWithTargets = () => {
+    if (!answerSpan) return <span>{completedSentence}</span>;
 
-    // Extract prefix (before underscores) and suffix (after underscores)
-    const underscoreIdx = clue.indexOf("_ _ _ _ _");
-    if (underscoreIdx === -1) return <span>{completedSentence}</span>;
+    const before = completedSentence.slice(0, answerSpan.start);
+    const middle = completedSentence.slice(answerSpan.start, answerSpan.end);
+    const after = completedSentence.slice(answerSpan.end);
 
-    const cluePrefix = clue.slice(0, underscoreIdx);
-    const clueSuffix = clue.slice(underscoreIdx + 9); // "_ _ _ _ _" = 9 chars
-
-    // The prefix in clue ends at the start of the hidden letters
-    // The prefix text in the completed sentence should match
-    // Find where the prefix text ends in the completed sentence
-    // The clue prefix ends with partial word chars that lead into the answer
-    // e.g., "La Scala performance where Eur" — the "Eur" is part of "Europe"
-    // In the completed sentence: "La Scala performance where Europe ranks highest"
-    // We need to find that the answer "OPERA" spans from "Eur[ope ra]nks"
-    // i.e., prefix ends with "Eur" and suffix starts with "nks"
-
-    // Match prefix length to find answer start in completedSentence
-    // The clue prefix = completed sentence prefix (they share the same text up to where underscores start)
-    const prefixLen = cluePrefix.length;
-
-    // Now find where the suffix starts in the completed sentence
-    // The suffix text from the clue should match the end of the completed sentence
-    const suffixTrimmed = clueSuffix.trimStart();
-    let answerEnd = -1;
-    if (suffixTrimmed.length > 0) {
-      // Find suffix in completed sentence
-      const suffixIdx = completedSentence.toLowerCase().indexOf(
-        suffixTrimmed.toLowerCase().slice(0, Math.min(suffixTrimmed.length, 10))
+    let letterIdx = 0;
+    const middleElements = middle.split("").map((char, i) => {
+      if (char === " ") {
+        return <span key={`sp-${i}`}> </span>;
+      }
+      const idx = letterIdx;
+      letterIdx++;
+      const isLanded = phase === "landed";
+      return (
+        <span
+          key={`l-${i}`}
+          ref={(el) => {
+            targetRefs.current[idx] = el;
+          }}
+          className={isLanded && !alreadySolved ? "letter-land" : ""}
+          style={{
+            display: "inline-block",
+            color: "var(--accent)",
+            fontWeight: 700,
+            animationDelay:
+              isLanded && !alreadySolved ? `${idx * 80}ms` : undefined,
+          }}
+        >
+          {char}
+        </span>
       );
-      if (suffixIdx >= 0) {
-        answerEnd = suffixIdx;
-      }
-    }
-
-    // Also try: from the prefix position, scan forward to find matching suffix
-    if (answerEnd === -1) {
-      answerEnd = completedSentence.length - clueSuffix.length;
-    }
-
-    // The clue prefix might have trailing/leading differences with the sentence
-    // Better approach: use the actual answer letters to find span
-    const answer = (displayLetters || "opera").toLowerCase();
-    let answerStart = -1;
-    let endPos = -1;
-
-    for (let i = 0; i < sentenceLower.length; i++) {
-      let matched = 0;
-      let j = i;
-      while (j < sentenceLower.length && matched < answer.length) {
-        if (sentenceLower[j] === " ") {
-          j++;
-          continue;
-        }
-        if (sentenceLower[j] === answer[matched]) {
-          matched++;
-          j++;
-        } else {
-          break;
-        }
-      }
-      if (matched === answer.length) {
-        answerStart = i;
-        endPos = j;
-        break;
-      }
-    }
-
-    if (answerStart === -1) {
-      return <span>{completedSentence}</span>;
-    }
-
-    const before = completedSentence.slice(0, answerStart);
-    const highlighted = completedSentence.slice(answerStart, endPos);
-    const after = completedSentence.slice(endPos);
+    });
 
     return (
       <>
         <span>{before}</span>
-        <span
-          style={{
-            color: "var(--accent)",
-            fontWeight: 700,
-          }}
-        >
-          {highlighted}
-        </span>
+        <span>{middleElements}</span>
         <span>{after}</span>
       </>
     );
   };
 
+  // Clue with highlighted underscores
+  const renderClue = () =>
+    clue.split(/(_ _ _ _ _)/).map((part, i) =>
+      part === "_ _ _ _ _" ? (
+        <span key={i} style={{ color: "var(--accent)", fontWeight: 700 }}>
+          {part}
+        </span>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    );
+
+  const showTiles =
+    phase === "playing" || phase === "correct" || phase === "flying";
+  const showSentenceText = phase === "flying" || phase === "landed";
+
   return (
     <div
-      className="flex flex-col items-center gap-6 w-full"
+      className="flex flex-col items-center gap-8 w-full"
       onClick={focusInput}
     >
       {/* Puzzle number */}
@@ -240,58 +281,74 @@ export default function GameBoard({
         Puzzle #{day}
       </div>
 
-      {/* Clue or Completed Sentence */}
-      {showSentence ? (
+      {/* Clue / Completed Sentence */}
+      <div
+        className="text-lg sm:text-xl text-center leading-relaxed max-w-lg px-4"
+        style={{
+          fontFamily: "'Libre Franklin', sans-serif",
+          color: "var(--text)",
+          minHeight: "3em",
+        }}
+      >
+        {showSentenceText ? (
+          <span
+            className={
+              phase === "landed" && !alreadySolved ? "sentence-reveal" : ""
+            }
+          >
+            {renderSentenceWithTargets()}
+          </span>
+        ) : (
+          <span
+            className="animate-fade-in-up"
+            style={{ display: "inline-block" }}
+          >
+            {renderClue()}
+          </span>
+        )}
+      </div>
+
+      {/* Tiles — visible while playing, during flip, and during fly */}
+      {showTiles && (
         <div
-          className={`text-lg sm:text-xl text-center leading-relaxed max-w-lg px-4 ${
-            alreadySolved ? "" : "sentence-reveal"
-          }`}
-          style={{
-            fontFamily: "'Libre Franklin', sans-serif",
-            color: "var(--text)",
-          }}
+          className="relative flex gap-2 animate-fade-in-up"
+          style={{ animationDelay: "100ms" }}
         >
-          {renderCompletedSentence()}
-        </div>
-      ) : (
-        <div
-          className="text-lg sm:text-xl text-center leading-relaxed max-w-lg px-4 animate-fade-in-up"
-          style={{
-            fontFamily: "'Libre Franklin', sans-serif",
-            color: "var(--text)",
-          }}
-        >
-          {clue.split(/(_ _ _ _ _)/).map((part, i) =>
-            part === "_ _ _ _ _" ? (
-              <span
-                key={i}
-                style={{ color: "var(--accent)", fontWeight: 700 }}
-              >
-                {part}
-              </span>
-            ) : (
-              <span key={i}>{part}</span>
-            )
-          )}
+          {Array.from({ length }).map((_, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                tileRefs.current[i] = el;
+              }}
+              style={phase === "flying" && flyStyles[i] ? flyStyles[i] : {}}
+            >
+              <Tile
+                index={i}
+                letter={displayLetters[i] || ""}
+                state={tileStates[i]}
+                animationDelay={tileStates[i] === "correct" ? i * 100 : 0}
+              />
+            </div>
+          ))}
+          {showConfetti && <Confetti />}
         </div>
       )}
 
-      {/* Tiles — visible while playing and during correct animation */}
-      {(!showSentence || (solved && !alreadySolved && !showSentence)) && (
+      {/* Solved tiles — always shown in landed state */}
+      {phase === "landed" && (
         <div
-          className={`relative flex gap-2 ${showSentence ? "tiles-fly-out" : "animate-fade-in-up"}`}
-          style={{ animationDelay: "100ms" }}
+          className={`flex gap-2 ${alreadySolved ? "" : "animate-fade-in-up"}`}
+          style={{ animationDelay: alreadySolved ? "0ms" : "100ms" }}
         >
           {Array.from({ length }).map((_, i) => (
             <Tile
               key={i}
               index={i}
               letter={displayLetters[i] || ""}
-              state={tileStates[i]}
-              animationDelay={tileStates[i] === "correct" ? i * 100 : 0}
+              state="solved"
+              animationDelay={0}
             />
           ))}
-          {showConfetti && <Confetti />}
         </div>
       )}
 
@@ -329,10 +386,10 @@ export default function GameBoard({
         )}
 
       {/* Success message */}
-      {solved && showSentence && (
+      {phase === "landed" && (
         <div
           className={`text-center ${alreadySolved ? "" : "animate-fade-in-up"}`}
-          style={{ animationDelay: alreadySolved ? "0ms" : "200ms" }}
+          style={{ animationDelay: alreadySolved ? "0ms" : "300ms" }}
         >
           <p className="text-lg font-bold" style={{ color: "var(--accent)" }}>
             Solved!

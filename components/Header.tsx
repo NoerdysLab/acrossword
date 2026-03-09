@@ -13,14 +13,14 @@ export default function Header() {
   return (
     <>
       <header
-        className="sticky top-0 z-40 border-b"
+        className="sticky top-0 z-40 border-b w-full"
         style={{
           backgroundColor: "var(--bg)",
           borderColor: "var(--header-border)",
           transition: "background-color 0.3s ease",
         }}
       >
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="w-full max-w-2xl mx-auto px-5 sm:px-6 h-14 flex items-center justify-between">
           <Link href="/" className="no-underline">
             <h1
               className="text-xl tracking-tight"

@@ -36,7 +36,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-dvh">
         <Header />
-        <main className="max-w-2xl mx-auto px-4 py-8">{children}</main>
+        <main className="w-full max-w-2xl mx-auto px-5 sm:px-6 py-10">{children}</main>
       </body>
     </html>
   );
