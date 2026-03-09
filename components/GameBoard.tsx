@@ -115,6 +115,59 @@ export default function GameBoard({
     }
   }, [solved]);
 
+  const submittingRef = useRef(false);
+
+  const submitGuess = useCallback(
+    async (guess: string) => {
+      if (submittingRef.current) return;
+      submittingRef.current = true;
+
+      try {
+        const res = await fetch("/api/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ day, guess }),
+        });
+        const data = await res.json();
+
+        if (data.correct) {
+          const totalGuesses = previousGuesses.length + 1;
+          setGuessCount(totalGuesses);
+          setSolved(true);
+          setSolvedAnswer(guess.toUpperCase());
+          setTileStates(Array(length).fill("correct"));
+          setShowConfetti(true);
+          markSolved(day, totalGuesses, guess);
+          setCurrentGame(null);
+
+          // After tile flip, show the completed sentence
+          setTimeout(() => setShowSentence(true), 800);
+          setTimeout(() => setShowConfetti(false), 2500);
+        } else {
+          setTileStates(Array(length).fill("wrong"));
+          const newGuesses = [
+            ...previousGuesses,
+            guess.toUpperCase(),
+          ];
+          setPreviousGuesses(newGuesses);
+          setCurrentGame({ day, guesses: newGuesses });
+
+          setTimeout(() => {
+            setCurrentGuess("");
+            setTileStates(Array(length).fill("empty"));
+            inputRef.current?.focus();
+            submittingRef.current = false;
+          }, 400);
+          return;
+        }
+      } catch {
+        setTileStates(Array(length).fill("empty"));
+      }
+      submittingRef.current = false;
+    },
+    [day, length, previousGuesses]
+  );
+
   const handleInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (solved) return;
@@ -126,56 +179,22 @@ export default function GameBoard({
         newStates[i] = "typing";
       }
       setTileStates(newStates);
+
+      // Auto-submit when all letters are filled
+      if (val.length === length) {
+        submitGuess(val);
+      }
     },
-    [solved, length]
+    [solved, length, submitGuess]
   );
 
   const handleSubmit = useCallback(
-    async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key !== "Enter" || solved) return;
       if (currentGuess.length !== length) return;
-
-      try {
-        const res = await fetch("/api/check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ day, guess: currentGuess }),
-        });
-        const data = await res.json();
-
-        if (data.correct) {
-          const totalGuesses = previousGuesses.length + 1;
-          setGuessCount(totalGuesses);
-          setSolved(true);
-          setSolvedAnswer(currentGuess.toUpperCase());
-          setTileStates(Array(length).fill("correct"));
-          setShowConfetti(true);
-          markSolved(day, totalGuesses, currentGuess);
-          setCurrentGame(null);
-
-          // After tile flip, show the completed sentence
-          setTimeout(() => setShowSentence(true), 800);
-          setTimeout(() => setShowConfetti(false), 2500);
-        } else {
-          setTileStates(Array(length).fill("wrong"));
-          const newGuesses = [
-            ...previousGuesses,
-            currentGuess.toUpperCase(),
-          ];
-          setPreviousGuesses(newGuesses);
-          setCurrentGame({ day, guesses: newGuesses });
-
-          setTimeout(() => {
-            setCurrentGuess("");
-            setTileStates(Array(length).fill("empty"));
-            inputRef.current?.focus();
-          }, 400);
-        }
-      } catch {
-        setTileStates(Array(length).fill("empty"));
-      }
+      submitGuess(currentGuess);
     },
-    [currentGuess, day, length, previousGuesses, solved]
+    [currentGuess, length, solved, submitGuess]
   );
 
   // Letters to display in tiles: saved answer when solved, current guess while playing
@@ -302,7 +321,7 @@ export default function GameBoard({
               animationDelay: "200ms",
             }}
           >
-            Type your guess and press Enter
+            Type your guess
           </p>
         )}
 
