@@ -324,13 +324,13 @@ export default function GameBoard({
     const stats = getStats();
     const firstGuess = guessCount === 1;
 
-    let shareText = `acrossword — Day ${day}\n`;
+    const hintWord = solvedHintsUsed === 1 ? "hint" : "hints";
+    let shareText = `ACROSSword — Day ${day}\n`;
     shareText += firstGuess
-      ? `🟩 Solved in 1 guess!\n`
-      : `🟩 Solved!\n`;
-    shareText += `💡 Hints: ${solvedHintsUsed}/2\n`;
-    shareText += `🔥 Streak: ${stats.currentStreak}\n`;
-    shareText += `\nacrossword.org`;
+      ? `🟦 Solved in 1 guess with ${solvedHintsUsed} ${hintWord}\n`
+      : `🟦 Solved with ${solvedHintsUsed} ${hintWord}\n`;
+    shareText += `Streak: ${stats.currentStreak}\n`;
+    shareText += `ACROSSword.org`;
 
     const canShare =
       typeof navigator !== "undefined" &&

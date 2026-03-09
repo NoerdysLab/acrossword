@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     description:
       "A new clue every day. Find the word hidden across the clue text.",
     type: "website",
-    url: "https://acrossword.org",
+    url: "https://ACROSSword.org",
   },
 };
 
