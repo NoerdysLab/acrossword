@@ -62,6 +62,21 @@ export default function Header() {
               </svg>
             </button>
 
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSfI5c6NX5fZxPnIY5SHWYrnubzfISLBY8TVftSvGuoVALPC6A/viewform?usp=publish-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: "var(--text)" }}
+              aria-label="Suggest a puzzle"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18h6" />
+                <path d="M10 22h4" />
+                <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" />
+              </svg>
+            </a>
+
             <button
               onClick={() => setHelpOpen(true)}
               className="p-2 rounded-lg transition-colors"
