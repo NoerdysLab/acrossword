@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Tile from "./Tile";
 import Confetti from "./Confetti";
+import Toast from "./Toast";
 import {
   getSolvedData,
   getCurrentGame,
   setCurrentGame,
   markSolved,
+  getStats,
 } from "@/lib/storage";
 
 interface GameBoardProps {
@@ -17,7 +19,7 @@ interface GameBoardProps {
   length: number;
 }
 
-type TileState = "empty" | "typing" | "wrong" | "correct" | "solved";
+type TileState = "empty" | "typing" | "wrong" | "correct" | "solved" | "hint";
 
 // Find where the answer letters span in the completed sentence.
 function findAnswerSpan(
@@ -80,6 +82,21 @@ export default function GameBoard({
   const [alreadySolved, setAlreadySolved] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Hint state
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [hintsRevealed, setHintsRevealed] = useState<string[]>([]);
+  const [hintLoading, setHintLoading] = useState(false);
+
+  // Timer state
+  const startTimeRef = useRef<number | null>(null);
+
+  // Share / toast state
+  const [solvedHintsUsed, setSolvedHintsUsed] = useState(0);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+  const submittingRef = useRef(false);
+
   // Load saved state
   useEffect(() => {
     const solvedData = getSolvedData();
@@ -88,6 +105,7 @@ export default function GameBoard({
       setSolved(true);
       setAlreadySolved(true);
       setGuessCount(entry.guesses);
+      setSolvedHintsUsed(entry.hintsUsed ?? 0);
       // Use stored answer, or derive it from the completed sentence as fallback
       const answer = entry.answer || deriveAnswer(completedSentence, length, clue);
       setSolvedAnswer(answer);
@@ -99,6 +117,11 @@ export default function GameBoard({
     const current = getCurrentGame();
     if (current && current.day === day) {
       setPreviousGuesses(current.guesses);
+      // Restore hint state
+      if (current.hintsUsed) setHintsUsed(current.hintsUsed);
+      if (current.hintsRevealed) setHintsRevealed(current.hintsRevealed);
+      // Restore timer
+      if (current.startTime) startTimeRef.current = current.startTime;
     }
   }, [day, length]);
 
@@ -115,29 +138,71 @@ export default function GameBoard({
     }
   }, [solved]);
 
-  const submittingRef = useRef(false);
+  // Record first interaction for timer
+  const ensureTimerStarted = useCallback(() => {
+    if (startTimeRef.current !== null) return;
+    startTimeRef.current = Date.now();
+    // Persist to localStorage
+    const current = getCurrentGame();
+    if (current && current.day === day) {
+      setCurrentGame({ ...current, startTime: startTimeRef.current });
+    } else {
+      setCurrentGame({ day, guesses: [], startTime: startTimeRef.current });
+    }
+  }, [day]);
+
+  // Build tile states accounting for hints
+  const buildTileStates = useCallback(
+    (guess: string, revealed: string[]): TileState[] => {
+      const states: TileState[] = Array(length).fill("empty");
+      for (let i = 0; i < length; i++) {
+        if (i < revealed.length) {
+          states[i] = "hint";
+        } else if (i < guess.length + revealed.length) {
+          states[i] = "typing";
+        }
+      }
+      return states;
+    },
+    [length]
+  );
+
+  // Build full display value: hints + typed guess
+  const buildFullGuess = useCallback(
+    (typed: string, revealed: string[]): string => {
+      const hintPart = revealed.join("");
+      return hintPart + typed;
+    },
+    []
+  );
 
   const submitGuess = useCallback(
     async (guess: string) => {
       if (submittingRef.current) return;
       submittingRef.current = true;
 
+      const fullGuess = buildFullGuess(guess, hintsRevealed);
+
       try {
         const res = await fetch("/api/check", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ day, guess }),
+          body: JSON.stringify({ day, guess: fullGuess }),
         });
         const data = await res.json();
 
         if (data.correct) {
           const totalGuesses = previousGuesses.length + 1;
+          const elapsedMs = startTimeRef.current
+            ? Date.now() - startTimeRef.current
+            : null;
           setGuessCount(totalGuesses);
           setSolved(true);
-          setSolvedAnswer(guess.toUpperCase());
+          setSolvedAnswer(fullGuess.toUpperCase());
+          setSolvedHintsUsed(hintsUsed);
           setTileStates(Array(length).fill("correct"));
           setShowConfetti(true);
-          markSolved(day, totalGuesses, guess);
+          markSolved(day, totalGuesses, fullGuess, hintsUsed, elapsedMs);
           setCurrentGame(null);
 
           // After tile flip, show the completed sentence
@@ -147,58 +212,153 @@ export default function GameBoard({
           setTileStates(Array(length).fill("wrong"));
           const newGuesses = [
             ...previousGuesses,
-            guess.toUpperCase(),
+            fullGuess.toUpperCase(),
           ];
           setPreviousGuesses(newGuesses);
-          setCurrentGame({ day, guesses: newGuesses });
+          setCurrentGame({
+            day,
+            guesses: newGuesses,
+            hintsUsed,
+            hintsRevealed,
+            startTime: startTimeRef.current,
+          });
 
           setTimeout(() => {
             setCurrentGuess("");
-            setTileStates(Array(length).fill("empty"));
+            setTileStates(buildTileStates("", hintsRevealed));
             inputRef.current?.focus();
             submittingRef.current = false;
           }, 400);
           return;
         }
       } catch {
-        setTileStates(Array(length).fill("empty"));
+        setTileStates(buildTileStates(guess, hintsRevealed));
       }
       submittingRef.current = false;
     },
-    [day, length, previousGuesses]
+    [day, length, previousGuesses, hintsUsed, hintsRevealed, buildFullGuess, buildTileStates]
   );
 
   const handleInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (solved) return;
-      const val = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, length);
+      ensureTimerStarted();
+      const maxTypable = length - hintsRevealed.length;
+      const val = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, maxTypable);
       setCurrentGuess(val);
-
-      const newStates: TileState[] = Array(length).fill("empty");
-      for (let i = 0; i < val.length; i++) {
-        newStates[i] = "typing";
-      }
-      setTileStates(newStates);
+      setTileStates(buildTileStates(val, hintsRevealed));
 
       // Auto-submit when all letters are filled
-      if (val.length === length) {
+      if (val.length === maxTypable) {
         submitGuess(val);
       }
     },
-    [solved, length, submitGuess]
+    [solved, length, hintsRevealed, submitGuess, buildTileStates, ensureTimerStarted]
   );
 
   const handleSubmit = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key !== "Enter" || solved) return;
-      if (currentGuess.length !== length) return;
+      const maxTypable = length - hintsRevealed.length;
+      if (currentGuess.length !== maxTypable) return;
       submitGuess(currentGuess);
     },
-    [currentGuess, length, solved, submitGuess]
+    [currentGuess, length, solved, submitGuess, hintsRevealed]
   );
 
-  // Letters to display in tiles: saved answer when solved, current guess while playing
-  const displayLetters = solved ? solvedAnswer || currentGuess : currentGuess;
+  // Hint handler
+  const useHint = useCallback(async () => {
+    if (hintLoading || solved || hintsUsed >= 2) return;
+    ensureTimerStarted();
+    setHintLoading(true);
+    const hintNumber = hintsUsed + 1;
+
+    try {
+      const res = await fetch("/api/hint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ day, hint: hintNumber }),
+      });
+      const data = await res.json();
+
+      if (data.letter) {
+        const newRevealed = [...hintsRevealed, data.letter];
+        const newHintsUsed = hintNumber;
+        setHintsRevealed(newRevealed);
+        setHintsUsed(newHintsUsed);
+
+        // If the user had typed a letter in the hint position, remove it
+        const newGuess = currentGuess.slice(0, length - newRevealed.length);
+        setCurrentGuess(newGuess);
+        setTileStates(buildTileStates(newGuess, newRevealed));
+
+        // Save state
+        const current = getCurrentGame();
+        setCurrentGame({
+          day,
+          guesses: current?.guesses ?? previousGuesses,
+          hintsUsed: newHintsUsed,
+          hintsRevealed: newRevealed,
+          startTime: startTimeRef.current,
+        });
+
+        inputRef.current?.focus();
+
+        // Auto-submit if all positions filled after hint
+        const maxTypable = length - newRevealed.length;
+        if (newGuess.length === maxTypable) {
+          submitGuess(newGuess);
+        }
+      }
+    } catch {
+      // silently fail
+    }
+    setHintLoading(false);
+  }, [
+    hintLoading, solved, hintsUsed, hintsRevealed, day, currentGuess,
+    length, previousGuesses, buildTileStates, submitGuess, ensureTimerStarted,
+  ]);
+
+  // Share handler
+  const handleShare = useCallback(async () => {
+    const stats = getStats();
+    const firstGuess = guessCount === 1;
+
+    let shareText = `acrossword — Day ${day}\n`;
+    shareText += firstGuess
+      ? `🟩 Solved in 1 guess!\n`
+      : `🟩 Solved!\n`;
+    shareText += `💡 Hints: ${solvedHintsUsed}/2\n`;
+    shareText += `🔥 Streak: ${stats.currentStreak}\n`;
+    shareText += `\nacrossword.org`;
+
+    const canShare =
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ text: shareText });
+
+    if (canShare) {
+      try {
+        await navigator.share({ text: shareText });
+      } catch {
+        // User cancelled or share failed — do nothing
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setToastMessage("Copied!");
+        setToastVisible(true);
+      } catch {
+        // Clipboard failed
+      }
+    }
+  }, [day, guessCount, solvedHintsUsed]);
+
+  // Build display letters: hints + typed letters
+  const displayLetters = solved
+    ? solvedAnswer || buildFullGuess(currentGuess, hintsRevealed)
+    : buildFullGuess(currentGuess, hintsRevealed);
 
   const answerSpan = findAnswerSpan(completedSentence, length, clue);
 
@@ -292,6 +452,28 @@ export default function GameBoard({
         {showConfetti && <Confetti />}
       </div>
 
+      {/* Hint button */}
+      {!solved && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            useHint();
+          }}
+          disabled={hintsUsed >= 2 || hintLoading}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity"
+          style={{
+            backgroundColor: "var(--bg-secondary)",
+            color: hintsUsed >= 2 ? "var(--text-secondary)" : "var(--text)",
+            opacity: hintsUsed >= 2 ? 0.5 : 1,
+            cursor: hintsUsed >= 2 ? "default" : "pointer",
+          }}
+          aria-label={`Use hint (${2 - hintsUsed} remaining)`}
+        >
+          <span>💡</span>
+          <span>{2 - hintsUsed}</span>
+        </button>
+      )}
+
       {/* Hidden input */}
       {!solved && (
         <input
@@ -313,7 +495,8 @@ export default function GameBoard({
       {/* Prompt to type */}
       {!solved &&
         previousGuesses.length === 0 &&
-        currentGuess.length === 0 && (
+        currentGuess.length === 0 &&
+        hintsUsed === 0 && (
           <p
             className="text-sm animate-fade-in-up"
             style={{
@@ -325,7 +508,7 @@ export default function GameBoard({
           </p>
         )}
 
-      {/* Success message */}
+      {/* Success message + Share */}
       {solved && showSentence && (
         <div
           className={`text-center ${alreadySolved ? "" : "animate-fade-in-up"}`}
@@ -342,6 +525,19 @@ export default function GameBoard({
               ? "Got it in 1 guess!"
               : `Got it in ${guessCount} guesses`}
           </p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleShare();
+            }}
+            className="mt-3 px-5 py-2 rounded-lg text-sm font-semibold transition-colors"
+            style={{
+              backgroundColor: "var(--accent)",
+              color: "#ffffff",
+            }}
+          >
+            Share
+          </button>
         </div>
       )}
 
@@ -370,6 +566,12 @@ export default function GameBoard({
           </div>
         </div>
       )}
+
+      <Toast
+        message={toastMessage}
+        visible={toastVisible}
+        onDone={() => setToastVisible(false)}
+      />
     </div>
   );
 }

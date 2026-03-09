@@ -5,6 +5,8 @@ export interface SolvedEntry {
   guesses: number;
   date: string;
   answer?: string;
+  hintsUsed?: number;
+  timeMs?: number | null;
 }
 
 export interface Stats {
@@ -17,6 +19,9 @@ export interface Stats {
 export interface CurrentGame {
   day: number;
   guesses: string[];
+  hintsUsed?: number;
+  hintsRevealed?: string[];
+  startTime?: number | null;
 }
 
 function getItem<T>(key: string): T | null {
@@ -80,13 +85,15 @@ export function setTheme(theme: "light" | "dark") {
   localStorage.setItem("acrossword-theme", theme);
 }
 
-export function markSolved(day: number, guessCount: number, answer: string) {
+export function markSolved(day: number, guessCount: number, answer: string, hintsUsed?: number, timeMs?: number | null) {
   const solved = getSolvedData();
   solved[String(day)] = {
     solved: true,
     guesses: guessCount,
     date: new Date().toISOString(),
     answer: answer.toUpperCase(),
+    hintsUsed: hintsUsed ?? 0,
+    timeMs: timeMs ?? null,
   };
   setSolvedData(solved);
 
