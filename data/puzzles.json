@@ -3,72 +3,84 @@
     "day": 1,
     "clue": "La Scala performance where Eur_ _ _ _ _nks highest",
     "answer": "OPERA",
+    "completedSentence": "La Scala performance where Europe ranks highest",
     "length": 5
   },
   {
     "day": 2,
     "clue": "Big cat in a pres_ _ _ _ _ace",
     "answer": "TIGER",
+    "completedSentence": "Big cat in a prestige race",
     "length": 5
   },
   {
     "day": 3,
     "clue": "Path f_ _ _ _ _s of debris around Earth",
     "answer": "ORBIT",
+    "completedSentence": "Path for bits of debris around Earth",
     "length": 5
   },
   {
     "day": 4,
     "clue": "Award na_ _ _ _ _oud at the podium",
     "answer": "MEDAL",
+    "completedSentence": "Award named aloud at the podium",
     "length": 5
   },
   {
     "day": 5,
     "clue": "Odysseus de_ _ _ _ _ever satisfied",
     "answer": "SIREN",
+    "completedSentence": "Odysseus desire never satisfied",
     "length": 5
   },
   {
     "day": 6,
-    "clue": "Battle where ea_ _ _ _ _ential part projects the king",
+    "clue": "Battle where ea_ _ _ _ _ential part protects the king",
     "answer": "CHESS",
+    "completedSentence": "Battle where each essential part protects the king",
     "length": 5
   },
   {
     "day": 7,
-    "clue": "Mars explorer fo_ _ _ _ _a decade now",
+    "clue": "Mars explorer fo_ _ _ _ _ a decade now",
     "answer": "ROVER",
+    "completedSentence": "Mars explorer for over a decade now",
     "length": 5
   },
   {
     "day": 8,
     "clue": "Digit useful wi_ _ _ _ _rellas",
     "answer": "THUMB",
+    "completedSentence": "Digit useful with umbrellas",
     "length": 5
   },
   {
     "day": 9,
-    "clue": "Big spread o_ _ _ _ _or of the frontier",
+    "clue": "Big spread o_ _ _ _ _or out west",
     "answer": "RANCH",
+    "completedSentence": "Big spread or anchor out west",
     "length": 5
   },
   {
     "day": 10,
-    "clue": "In an herbal heal_ _ _ _ _nu",
+    "clue": "In an herbal and heal_ _ _ _ _nu",
     "answer": "THYME",
+    "completedSentence": "In an herbal and healthy menu",
     "length": 5
   },
   {
     "day": 11,
     "clue": "House where dra_ _ _ _ _mally unfolds",
     "answer": "MANOR",
+    "completedSentence": "House where drama normally unfolds",
     "length": 5
   },
   {
     "day": 12,
     "clue": "Ea_ _ _ _ _of the wearer may glisten",
     "answer": "CHARM",
+    "completedSentence": "Each arm of the wearer may glisten",
     "length": 5
   }
 ]

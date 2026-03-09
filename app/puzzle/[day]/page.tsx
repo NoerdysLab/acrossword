@@ -65,6 +65,7 @@ export default async function PuzzlePage({ params }: PuzzlePageProps) {
         <GameBoard
           day={day}
           clue={getPublicPuzzle(day)!.clue}
+          completedSentence={getPublicPuzzle(day)!.completedSentence}
           length={getPublicPuzzle(day)!.length}
         />
       </div>
@@ -85,7 +86,7 @@ export default async function PuzzlePage({ params }: PuzzlePageProps) {
 
   return (
     <div className="flex flex-col items-center gap-4 pt-4">
-      <GameBoard day={puzzle.day} clue={puzzle.clue} length={puzzle.length} />
+      <GameBoard day={puzzle.day} clue={puzzle.clue} completedSentence={puzzle.completedSentence} length={puzzle.length} />
     </div>
   );
 }

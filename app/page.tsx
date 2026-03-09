@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center gap-4 pt-4">
-      <GameBoard day={puzzle.day} clue={puzzle.clue} length={puzzle.length} />
+      <GameBoard day={puzzle.day} clue={puzzle.clue} completedSentence={puzzle.completedSentence} length={puzzle.length} />
     </div>
   );
 }

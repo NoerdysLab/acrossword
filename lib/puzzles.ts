@@ -5,12 +5,14 @@ export interface Puzzle {
   day: number;
   clue: string;
   answer: string;
+  completedSentence: string;
   length: number;
 }
 
 export interface PublicPuzzle {
   day: number;
   clue: string;
+  completedSentence: string;
   length: number;
 }
 
@@ -32,13 +34,23 @@ export function getPuzzle(day: number): Puzzle | undefined {
 export function getPublicPuzzle(day: number): PublicPuzzle | undefined {
   const puzzle = getPuzzle(day);
   if (!puzzle) return undefined;
-  return { day: puzzle.day, clue: puzzle.clue, length: puzzle.length };
+  return {
+    day: puzzle.day,
+    clue: puzzle.clue,
+    completedSentence: puzzle.completedSentence,
+    length: puzzle.length,
+  };
 }
 
 export function getAllPublicPuzzles(upToDay: number): PublicPuzzle[] {
   return (puzzlesData as Puzzle[])
     .filter((p) => p.day <= upToDay)
-    .map((p) => ({ day: p.day, clue: p.clue, length: p.length }));
+    .map((p) => ({
+      day: p.day,
+      clue: p.clue,
+      completedSentence: p.completedSentence,
+      length: p.length,
+    }));
 }
 
 export function checkAnswer(day: number, guess: string): boolean {
