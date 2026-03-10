@@ -10,13 +10,13 @@ export default function HowToPlay({ open, onClose }: HowToPlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       style={{ backgroundColor: "var(--overlay)" }}
       onClick={onClose}
     >
       <div
-        className="rounded-xl p-6 max-w-md w-full animate-fade-in-up"
-        style={{ backgroundColor: "var(--modal-bg)", color: "var(--text)" }}
+        className="rounded-xl p-6 sm:p-8 w-full animate-fade-in-up"
+        style={{ backgroundColor: "var(--modal-bg)", color: "var(--text)", maxWidth: "480px" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">

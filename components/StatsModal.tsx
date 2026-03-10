@@ -28,13 +28,13 @@ export default function StatsModal({ open, onClose }: StatsModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       style={{ backgroundColor: "var(--overlay)" }}
       onClick={onClose}
     >
       <div
-        className="rounded-xl p-6 max-w-sm w-full animate-fade-in-up"
-        style={{ backgroundColor: "var(--modal-bg)", color: "var(--text)" }}
+        className="rounded-xl p-6 sm:p-8 w-full animate-fade-in-up"
+        style={{ backgroundColor: "var(--modal-bg)", color: "var(--text)", maxWidth: "480px" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -69,7 +69,7 @@ export default function StatsModal({ open, onClose }: StatsModalProps) {
           <div className="space-y-2">
             {buckets.map((bucket) => {
               const count = stats.guessDistribution[bucket] || 0;
-              const width = maxGuesses > 0 ? Math.max((count / maxGuesses) * 100, 8) : 8;
+              const width = maxGuesses > 0 ? Math.max((count / maxGuesses) * 90, 8) : 8;
               return (
                 <div key={bucket} className="flex items-center gap-2">
                   <span className="text-sm w-5 text-right">{bucket}</span>
