@@ -34,9 +34,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-dvh">
+      <body className="min-h-dvh flex flex-col">
         <Header />
-        <main style={{ maxWidth: "42rem", marginLeft: "auto", marginRight: "auto", width: "100%", paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>{children}</main>
+        <main className="flex-1" style={{ maxWidth: "42rem", marginLeft: "auto", marginRight: "auto", width: "100%", paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>{children}</main>
+        <footer className="text-center pb-4 pt-2" style={{ color: "var(--text-secondary)", fontSize: "0.7rem", opacity: 0.5 }}>
+          v1.2.0
+        </footer>
       </body>
     </html>
   );
