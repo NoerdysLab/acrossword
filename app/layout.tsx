@@ -38,7 +38,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1" style={{ maxWidth: "42rem", marginLeft: "auto", marginRight: "auto", width: "100%", paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>{children}</main>
         <footer className="text-center pb-4 pt-2" style={{ color: "var(--text-secondary)", fontSize: "0.7rem", opacity: 0.5 }}>
-          v1.2.0
+          v1.3.0
         </footer>
       </body>
     </html>
