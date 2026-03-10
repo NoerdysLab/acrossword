@@ -573,6 +573,20 @@ export default function GameBoard({
               </svg>
             </button>
           </div>
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSfI5c6NX5fZxPnIY5SHWYrnubzfISLBY8TVftSvGuoVALPC6A/viewform?usp=publish-editor"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="animate-fade-in-up text-sm mt-2"
+            style={{
+              color: "var(--text-secondary)",
+              animationDelay: alreadySolved ? "0ms" : "600ms",
+              textDecoration: "underline",
+              textUnderlineOffset: "2px",
+            }}
+          >
+            Submit your own ACROSSword
+          </a>
         </div>
       )}
 
