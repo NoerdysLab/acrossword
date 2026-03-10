@@ -44,7 +44,7 @@ export default async function PuzzlePage({ params }: PuzzlePageProps) {
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
           <p className="font-semibold" style={{ color: "var(--text)" }}>
-            Puzzle #{day} is locked
+            Day #{day} is locked
           </p>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
             Only today&apos;s puzzle and the previous {PLAYABLE_WINDOW} days are

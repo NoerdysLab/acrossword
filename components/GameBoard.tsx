@@ -422,7 +422,7 @@ export default function GameBoard({
         className="text-sm font-semibold tracking-wide uppercase"
         style={{ color: "var(--text-secondary)" }}
       >
-        Puzzle #{day}
+        Day #{day}
       </div>
 
       {/* Clue or Completed Sentence */}
