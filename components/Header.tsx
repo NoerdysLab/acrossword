@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import StatsModal from "./StatsModal";
-import HowToPlay from "./HowToPlay";
+import DemoModal from "./DemoModal";
 
 export default function Header() {
   const [statsOpen, setStatsOpen] = useState(false);
@@ -81,7 +81,7 @@ export default function Header() {
       </header>
 
       <StatsModal open={statsOpen} onClose={() => setStatsOpen(false)} />
-      <HowToPlay open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <DemoModal open={helpOpen} onClose={() => setHelpOpen(false)} />
     </>
   );
 }

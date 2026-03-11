@@ -146,24 +146,9 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
 
   const renderTiles = () => {
     if (isReveal) {
-      // Tiles fade out during reveal
+      // Keep tiles visible in solved green state
       return ANSWER.split("").map((l, i) => (
-        <div
-          key={i}
-          className="inline-flex items-center justify-center border-2 rounded-lg text-lg font-bold select-none"
-          style={{
-            width: "2.75rem",
-            height: "2.75rem",
-            borderColor: "var(--accent)",
-            backgroundColor: "var(--accent)",
-            color: "#ffffff",
-            opacity: 0,
-            transition: "opacity 0.5s ease-out",
-            transitionDelay: `${i * 80}ms`,
-          }}
-        >
-          {l}
-        </div>
+        <MiniTile key={i} letter={l} state="correct" delay={0} />
       ));
     }
 
@@ -244,16 +229,9 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
 
           <div className="rounded-lg p-4 space-y-3" style={{ backgroundColor: "var(--bg-secondary)" }}>
             {renderClue()}
-            {!isReveal && (
-              <div className="flex gap-1.5 justify-center">
-                {renderTiles()}
-              </div>
-            )}
-            {isReveal && (
-              <div className="flex gap-1.5 justify-center" style={{ height: "2.75rem" }}>
-                {renderTiles()}
-              </div>
-            )}
+            <div className="flex gap-1.5 justify-center">
+              {renderTiles()}
+            </div>
             <p className="text-xs text-center" style={{ opacity: isReveal ? 1 : 0.6, transition: "opacity 0.5s" }}>
               The answer is <strong style={{ color: "var(--accent)" }}>ORBIT</strong> — hidden in &quot;f<strong style={{ color: "var(--accent)" }}>or bit</strong>s&quot;
             </p>
