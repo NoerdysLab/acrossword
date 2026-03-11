@@ -71,9 +71,9 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
     }
 
     // Animate through phases
-    const t1 = setTimeout(() => setPhase("wrong"), 600);
-    const t2 = setTimeout(() => setPhase("locked"), 1200);
-    const t3 = setTimeout(() => setPhase("solved"), 2200);
+    const t1 = setTimeout(() => setPhase("wrong"), 3000);
+    const t2 = setTimeout(() => setPhase("locked"), 6000);
+    const t3 = setTimeout(() => setPhase("solved"), 11000);
 
     return () => {
       clearTimeout(t1);
