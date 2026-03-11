@@ -109,6 +109,7 @@ export default function GameBoard({
       setGuessCount(entry.guesses);
       const ans = entry.answer || deriveAnswer(completedSentence, length, clue);
       setSolvedAnswer(ans);
+      if (entry.guessHistory) setPreviousGuesses(entry.guessHistory.slice(0, -1));
       setTileStates(Array(length).fill("solved"));
       setShowSentence(true);
       return;
@@ -238,7 +239,8 @@ export default function GameBoard({
           setSolvedAnswer(fullGuess.toUpperCase());
           setTileStates(Array(length).fill("correct"));
           setShowConfetti(true);
-          markSolved(day, totalGuesses, fullGuess, 0, elapsedMs);
+          const allGuesses = [...previousGuesses, fullGuess.toUpperCase()];
+          markSolved(day, totalGuesses, fullGuess, 0, elapsedMs, allGuesses);
           setCurrentGame(null);
 
           setTimeout(() => setShowSentence(true), 800);
@@ -312,18 +314,32 @@ export default function GameBoard({
     [currentGuess, unlockedCount, solved, submitGuess]
   );
 
-  // Build share text
+  // Build share text with Wordle-style emoji grid
   const buildShareText = useCallback(() => {
     const stats = getStats();
-    const firstGuess = guessCount === 1;
+    const isDark = typeof document !== "undefined" &&
+      document.documentElement.getAttribute("data-theme") === "dark";
+    const wrongEmoji = isDark ? "⬛" : "⬜";
+
+    // Build emoji line for a guess
+    const emojiLine = (guess: string): string => {
+      return Array.from({ length })
+        .map((_, i) => guess[i]?.toUpperCase() === answer[i] ? "🟦" : wrongEmoji)
+        .join(" ");
+    };
+
     let text = `ACROSSword — Day ${day}\n`;
-    text += firstGuess
-      ? `🟦 Solved in 1 guess\n`
-      : `🟦 Solved in ${guessCount} guesses\n`;
+
+    // All previous (wrong) guesses + the final correct guess
+    const allGuesses = [...previousGuesses, solvedAnswer];
+    for (const guess of allGuesses) {
+      text += emojiLine(guess) + "\n";
+    }
+
     text += `Streak: ${stats.currentStreak}\n`;
     text += `ACROSSword.org`;
     return text;
-  }, [day, guessCount]);
+  }, [day, length, answer, previousGuesses, solvedAnswer]);
 
   // Copy handler
   const handleCopy = useCallback(async () => {
