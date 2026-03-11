@@ -3,7 +3,7 @@
 interface TileProps {
   letter: string;
   index: number;
-  state: "empty" | "typing" | "wrong" | "correct" | "solved" | "hint";
+  state: "empty" | "typing" | "wrong" | "correct" | "solved";
   animationDelay?: number;
 }
 
@@ -13,12 +13,7 @@ export default function Tile({ letter, state, animationDelay = 0 }: TileProps) {
   let textColor = "var(--text)";
   let animation = "";
 
-  if (state === "hint") {
-    animation = "animate-pop";
-    bgColor = "var(--hint-bg)";
-    borderColor = "var(--hint-border)";
-    textColor = "#ffffff";
-  } else if (state === "typing" && letter) {
+  if (state === "typing" && letter) {
     animation = "animate-pop";
     borderColor = "var(--accent)";
   } else if (state === "wrong") {

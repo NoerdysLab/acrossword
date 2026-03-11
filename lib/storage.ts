@@ -21,6 +21,7 @@ export interface CurrentGame {
   guesses: string[];
   hintsUsed?: number;
   hintsRevealed?: string[];
+  lockedLetters?: string[];
   startTime?: number | null;
 }
 
