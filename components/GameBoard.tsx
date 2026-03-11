@@ -107,6 +107,11 @@ export default function GameBoard({
 
   // Load saved state
   useEffect(() => {
+    // Show demo for first-time visitors
+    if (!hasSeenDemo()) {
+      setShowDemo(true);
+    }
+
     const solvedData = getSolvedData();
     const entry = solvedData[String(day)];
     if (entry?.solved) {
@@ -135,10 +140,6 @@ export default function GameBoard({
         });
         setTileStates(states);
       }
-    }
-    // Show demo for first-time visitors
-    if (!hasSeenDemo()) {
-      setShowDemo(true);
     }
   }, [day, length]);
 
