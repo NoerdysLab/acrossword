@@ -87,6 +87,16 @@ export function setTheme(theme: "light" | "dark") {
   localStorage.setItem("acrossword-theme", theme);
 }
 
+export function hasSeenDemo(): boolean {
+  if (typeof window === "undefined") return true;
+  return localStorage.getItem("acrossword-demo-seen") === "true";
+}
+
+export function markDemoSeen() {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("acrossword-demo-seen", "true");
+}
+
 export function markSolved(day: number, guessCount: number, answer: string, hintsUsed?: number, timeMs?: number | null, guessHistory?: string[]) {
   const solved = getSolvedData();
   solved[String(day)] = {

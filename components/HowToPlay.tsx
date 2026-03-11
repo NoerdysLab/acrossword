@@ -31,24 +31,24 @@ export default function HowToPlay({ open, onClose }: HowToPlayProps) {
 
         <div className="space-y-4 text-sm" style={{ color: "var(--text-secondary)" }}>
           <p>
-            Each day, a new clue is released. The answer is a <strong style={{ color: "var(--text)" }}>single word hidden within the clue</strong> — its letters span across word boundaries.
+            Each day, a new clue is released. The answer is a <strong style={{ color: "var(--text)" }}>5-letter word hidden within the sentence</strong> — its letters span across word boundaries.
           </p>
 
           <div className="rounded-lg p-4" style={{ backgroundColor: "var(--bg-secondary)" }}>
             <p className="font-mono text-base mb-2" style={{ color: "var(--text)" }}>
-              La Scala performance where Eur<span style={{ color: "var(--accent)" }}>_ _ _ _ _</span>nks highest
+              Path f<span style={{ color: "var(--accent)" }}>_ _ _ _ _</span>s of space debris
             </p>
             <p className="text-xs">
-              The answer is <strong style={{ color: "var(--accent)" }}>OPERA</strong> — hidden across &quot;Eur<strong>ope ra</strong>nks&quot;
+              The answer is <strong style={{ color: "var(--accent)" }}>ORBIT</strong> — hidden across &quot;f<strong>or bit</strong>s&quot;
             </p>
           </div>
 
           <p>
-            Type your guess and press <strong style={{ color: "var(--text)" }}>Enter</strong>. You have unlimited guesses.
+            Type your guess and press <strong style={{ color: "var(--text)" }}>Submit</strong> or <strong style={{ color: "var(--text)" }}>Enter</strong>. Letters in the correct position lock in green — just like Wordle.
           </p>
 
           <p>
-            A new puzzle is released every day at midnight ET. You can also play the previous 3 days from the Archive.
+            A new puzzle is released every day at midnight ET. You can also play recent days from the Archive.
           </p>
         </div>
       </div>

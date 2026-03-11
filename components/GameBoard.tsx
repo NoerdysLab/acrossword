@@ -4,12 +4,15 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Tile from "./Tile";
 import Confetti from "./Confetti";
 import Toast from "./Toast";
+import DemoModal from "./DemoModal";
 import {
   getSolvedData,
   getCurrentGame,
   setCurrentGame,
   markSolved,
   getStats,
+  hasSeenDemo,
+  markDemoSeen,
 } from "@/lib/storage";
 
 interface GameBoardProps {
@@ -94,6 +97,9 @@ export default function GameBoard({
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
+  // Demo modal for first-time visitors
+  const [showDemo, setShowDemo] = useState(false);
+
   const submittingRef = useRef(false);
 
   // Derived answer for client-side letter checking
@@ -130,14 +136,24 @@ export default function GameBoard({
         setTileStates(states);
       }
     }
+    // Show demo for first-time visitors
+    if (!hasSeenDemo()) {
+      setShowDemo(true);
+    }
   }, [day, length]);
+
+  const handleDemoClose = useCallback(() => {
+    setShowDemo(false);
+    markDemoSeen();
+    inputRef.current?.focus();
+  }, []);
 
   // Focus input
   useEffect(() => {
-    if (!solved) {
+    if (!solved && !showDemo) {
       inputRef.current?.focus();
     }
-  }, [solved]);
+  }, [solved, showDemo]);
 
   const focusInput = useCallback(() => {
     if (!solved) {
@@ -588,6 +604,8 @@ export default function GameBoard({
         visible={toastVisible}
         onDone={() => setToastVisible(false)}
       />
+
+      <DemoModal open={showDemo} onClose={handleDemoClose} />
     </div>
   );
 }
