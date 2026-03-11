@@ -9,7 +9,6 @@ import {
   getCurrentGame,
   setCurrentGame,
   markSolved,
-  getStats,
 } from "@/lib/storage";
 
 interface GameBoardProps {
@@ -90,7 +89,7 @@ export default function GameBoard({
   // Timer state
   const startTimeRef = useRef<number | null>(null);
 
-  // Share / toast state
+  // Toast state
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
@@ -317,57 +316,6 @@ export default function GameBoard({
     [currentGuess, unlockedCount, solved, submitGuess]
   );
 
-  // Build share text
-  const buildShareText = useCallback(() => {
-    const stats = getStats();
-    const firstGuess = guessCount === 1;
-    let text = `ACROSSword — Day ${day}\n`;
-    text += firstGuess
-      ? `🟦 Solved in 1 guess\n`
-      : `🟦 Solved in ${guessCount} guesses\n`;
-    text += `Streak: ${stats.currentStreak}\n`;
-    text += `ACROSSword.org`;
-    return text;
-  }, [day, guessCount]);
-
-  // Share handler (native share sheet)
-  const handleShare = useCallback(async () => {
-    const shareText = buildShareText();
-    const canShare =
-      typeof navigator !== "undefined" &&
-      typeof navigator.share === "function" &&
-      typeof navigator.canShare === "function" &&
-      navigator.canShare({ text: shareText });
-
-    if (canShare) {
-      try {
-        await navigator.share({ text: shareText });
-      } catch {
-        // User cancelled or share failed
-      }
-    } else {
-      // Fallback to copy
-      try {
-        await navigator.clipboard.writeText(shareText);
-        setToastMessage("Copied!");
-        setToastVisible(true);
-      } catch {
-        // Clipboard failed
-      }
-    }
-  }, [buildShareText]);
-
-  // Copy handler
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(buildShareText());
-      setToastMessage("Copied!");
-      setToastVisible(true);
-    } catch {
-      // Clipboard failed
-    }
-  }, [buildShareText]);
-
   // Build display letters as array so locked letters stay at correct positions
   const displayLetters: string[] = solved
     ? (solvedAnswer || answer).split("")
@@ -515,36 +463,6 @@ export default function GameBoard({
               ? "Got it in 1 guess!"
               : `Got it in ${guessCount} guesses`}
           </p>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleShare();
-            }}
-            className="mt-4 px-8 py-3 rounded-lg text-base font-semibold transition-colors"
-            style={{
-              backgroundColor: "var(--accent)",
-              color: "#ffffff",
-            }}
-          >
-            Share
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCopy();
-            }}
-            className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-colors"
-            style={{
-              backgroundColor: "var(--bg-secondary)",
-              color: "var(--text-secondary)",
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-            Copy results
-          </button>
           <a
             href="https://docs.google.com/forms/d/e/1FAIpQLSfI5c6NX5fZxPnIY5SHWYrnubzfISLBY8TVftSvGuoVALPC6A/viewform?usp=publish-editor"
             target="_blank"
