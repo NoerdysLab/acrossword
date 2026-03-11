@@ -461,8 +461,10 @@ export default function GameBoard({
             }
           }}
           disabled={currentGuess.length !== unlockedCount}
-          className="px-8 py-2 rounded-lg text-sm font-semibold transition-colors"
+          className="w-full rounded-lg text-base font-semibold transition-colors"
           style={{
+            maxWidth: `${length * 4.5}rem`,
+            padding: "0.75rem 2rem",
             backgroundColor: currentGuess.length === unlockedCount ? "var(--accent)" : "var(--bg-secondary)",
             color: currentGuess.length === unlockedCount ? "#ffffff" : "var(--text-secondary)",
             opacity: currentGuess.length === unlockedCount ? 1 : 0.5,
