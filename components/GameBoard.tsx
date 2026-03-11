@@ -469,7 +469,7 @@ export default function GameBoard({
             cursor: currentGuess.length === unlockedCount ? "pointer" : "default",
           }}
         >
-          Guess
+          Submit
         </button>
       )}
 
