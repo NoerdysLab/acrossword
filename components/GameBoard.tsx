@@ -341,7 +341,7 @@ export default function GameBoard({
     const emojiLine = (guess: string): string => {
       return Array.from({ length })
         .map((_, i) => guess[i]?.toUpperCase() === answer[i] ? "🟦" : wrongEmoji)
-        .join(" ");
+        .join("");
     };
 
     let text = `ACROSSword — Day ${day}\n`;
