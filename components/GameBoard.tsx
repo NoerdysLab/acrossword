@@ -174,7 +174,7 @@ export default function GameBoard({
     [length]
   );
 
-  // Build full guess: merge locked letters with typed letters
+  // Build full guess string for submission: merge locked + typed into contiguous string
   const buildFullGuess = useCallback(
     (typed: string, locked: string[]): string => {
       let result = "";
@@ -188,6 +188,24 @@ export default function GameBoard({
         }
       }
       return result;
+    },
+    [length]
+  );
+
+  // Build display array: locked letters at their positions, typed letters filling unlocked slots
+  const buildDisplayLetters = useCallback(
+    (typed: string, locked: string[]): string[] => {
+      const display: string[] = Array(length).fill("");
+      let typedIdx = 0;
+      for (let i = 0; i < length; i++) {
+        if (locked[i]) {
+          display[i] = locked[i];
+        } else if (typedIdx < typed.length) {
+          display[i] = typed[typedIdx];
+          typedIdx++;
+        }
+      }
+      return display;
     },
     [length]
   );
@@ -235,7 +253,14 @@ export default function GameBoard({
             }
           }
 
-          setTileStates(Array(length).fill("wrong"));
+          // Shake only unlocked tiles; keep locked tiles green
+          const wrongStates: TileState[] = Array(length).fill("wrong");
+          for (let i = 0; i < length; i++) {
+            if (lockedLetters[i]) {
+              wrongStates[i] = "correct";
+            }
+          }
+          setTileStates(wrongStates);
           const newGuesses = [
             ...previousGuesses,
             fullGuess.toUpperCase(),
@@ -343,12 +368,10 @@ export default function GameBoard({
     }
   }, [buildShareText]);
 
-  // Build display letters: locked letters + typed letters filling unlocked positions
-  const getDisplayLetters = (): string => {
-    if (solved) return solvedAnswer || buildFullGuess(currentGuess, lockedLetters);
-    return buildFullGuess(currentGuess, lockedLetters);
-  };
-  const displayLetters = getDisplayLetters();
+  // Build display letters as array so locked letters stay at correct positions
+  const displayLetters: string[] = solved
+    ? (solvedAnswer || answer).split("")
+    : buildDisplayLetters(currentGuess, lockedLetters);
 
   const answerSpan = findAnswerSpan(completedSentence, length, clue);
 
