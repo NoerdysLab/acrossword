@@ -299,13 +299,8 @@ export default function GameBoard({
       const val = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, unlockedCount);
       setCurrentGuess(val);
       setTileStates(buildTileStates(val, lockedLetters));
-
-      // Auto-submit when all letters are filled
-      if (val.length === unlockedCount) {
-        submitGuess(val);
-      }
     },
-    [solved, unlockedCount, lockedLetters, submitGuess, buildTileStates, ensureTimerStarted]
+    [solved, unlockedCount, lockedLetters, buildTileStates, ensureTimerStarted]
   );
 
   const handleSubmit = useCallback(
@@ -454,6 +449,28 @@ export default function GameBoard({
           className="game-input"
           aria-label="Type your guess"
         />
+      )}
+
+      {/* Guess button */}
+      {!solved && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (currentGuess.length === unlockedCount) {
+              submitGuess(currentGuess);
+            }
+          }}
+          disabled={currentGuess.length !== unlockedCount}
+          className="px-8 py-2 rounded-lg text-sm font-semibold transition-colors"
+          style={{
+            backgroundColor: currentGuess.length === unlockedCount ? "var(--accent)" : "var(--bg-secondary)",
+            color: currentGuess.length === unlockedCount ? "#ffffff" : "var(--text-secondary)",
+            opacity: currentGuess.length === unlockedCount ? 1 : 0.5,
+            cursor: currentGuess.length === unlockedCount ? "pointer" : "default",
+          }}
+        >
+          Guess
+        </button>
       )}
 
       {/* Prompt to type */}
