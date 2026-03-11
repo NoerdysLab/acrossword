@@ -10,6 +10,9 @@ interface DemoModalProps {
 // LIGHT vs ORBIT: only T (position 4) matches
 const WRONG_GUESS = "LIGHT";
 const ANSWER = "ORBIT";
+const CLUE_BEFORE = "Path f";
+const CLUE_AFTER = "s of space debris";
+const COMPLETED_SENTENCE = "Path forbits of space debris";
 
 function MiniTile({
   letter,
@@ -17,7 +20,7 @@ function MiniTile({
   delay = 0,
 }: {
   letter: string;
-  state: "empty" | "wrong" | "correct-lock" | "correct";
+  state: "empty" | "typing" | "wrong" | "correct-lock" | "correct";
   delay?: number;
 }) {
   let borderColor = "var(--tile-border)";
@@ -25,7 +28,10 @@ function MiniTile({
   let textColor = "var(--text)";
   let animation = "";
 
-  if (state === "wrong") {
+  if (state === "typing") {
+    animation = "animate-pop";
+    borderColor = "var(--text-secondary)";
+  } else if (state === "wrong") {
     animation = "animate-shake";
     borderColor = "#ef4444";
   } else if (state === "correct-lock") {
@@ -59,7 +65,14 @@ function MiniTile({
   );
 }
 
-type Phase = "clue" | "wrong" | "locked" | "solved";
+type Phase =
+  | "clue"
+  | { type: "typing-wrong"; count: number }
+  | "wrong"
+  | "locked"
+  | { type: "typing-correct"; count: number }
+  | "solved"
+  | "reveal";
 
 export default function DemoModal({ open, onClose }: DemoModalProps) {
   const [phase, setPhase] = useState<Phase>("clue");
@@ -70,47 +83,145 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
       return;
     }
 
-    // Animate through phases
-    const t1 = setTimeout(() => setPhase("wrong"), 3000);
-    const t2 = setTimeout(() => setPhase("locked"), 6000);
-    const t3 = setTimeout(() => setPhase("solved"), 11000);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let t = 1500; // initial pause
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
+    // Type LIGHT one letter at a time
+    for (let i = 1; i <= 5; i++) {
+      const count = i;
+      timers.push(setTimeout(() => setPhase({ type: "typing-wrong", count }), t));
+      t += 400;
+    }
+
+    // Shake (wrong)
+    t += 600;
+    timers.push(setTimeout(() => setPhase("wrong"), t));
+
+    // Lock T at position 4
+    t += 1500;
+    timers.push(setTimeout(() => setPhase("locked"), t));
+
+    // Type ORBIT: O, R, B, I into unlocked slots (T already locked)
+    t += 1200;
+    for (let i = 1; i <= 4; i++) {
+      const count = i;
+      timers.push(setTimeout(() => setPhase({ type: "typing-correct", count }), t));
+      t += 400;
+    }
+
+    // Solved — all flip green
+    t += 800;
+    timers.push(setTimeout(() => setPhase("solved"), t));
+
+    // Reveal — letters animate into the clue
+    t += 1500;
+    timers.push(setTimeout(() => setPhase("reveal"), t));
+
+    return () => timers.forEach(clearTimeout);
   }, [open]);
 
   if (!open) return null;
 
-  const renderTiles = () => {
-    switch (phase) {
-      case "clue":
-        return ANSWER.split("").map((_, i) => (
-          <MiniTile key={i} letter="" state="empty" />
-        ));
-      case "wrong":
-        // Show LIGHT, all shake (T matches but we show the shake first)
-        return WRONG_GUESS.split("").map((l, i) => (
-          <MiniTile key={i} letter={l} state="wrong" />
-        ));
-      case "locked":
-        // T locked at position 4, rest empty
-        return ANSWER.split("").map((_, i) => (
-          <MiniTile
-            key={i}
-            letter={i === 4 ? "T" : ""}
-            state={i === 4 ? "correct-lock" : "empty"}
-            delay={i === 4 ? 0 : 0}
-          />
-        ));
-      case "solved":
-        // All ORBIT letters flip green
-        return ANSWER.split("").map((l, i) => (
-          <MiniTile key={i} letter={l} state="correct" delay={i * 100} />
-        ));
+  const isReveal = phase === "reveal";
+
+  const renderClue = () => {
+    if (isReveal) {
+      // Show the completed sentence with answer highlighted
+      return (
+        <p
+          className="text-base text-center sentence-reveal"
+          style={{ fontFamily: "'Libre Franklin', sans-serif", color: "var(--text)" }}
+        >
+          {CLUE_BEFORE}<span style={{ color: "var(--accent)", fontWeight: 700 }}>or bit</span>{CLUE_AFTER}
+        </p>
+      );
     }
+
+    return (
+      <p className="text-base text-center" style={{ fontFamily: "'Libre Franklin', sans-serif", color: "var(--text)" }}>
+        {CLUE_BEFORE}<span style={{ color: "var(--accent)", fontWeight: 700 }}>_ _ _ _ _</span>{CLUE_AFTER}
+      </p>
+    );
+  };
+
+  const renderTiles = () => {
+    if (isReveal) {
+      // Tiles fade out during reveal
+      return ANSWER.split("").map((l, i) => (
+        <div
+          key={i}
+          className="inline-flex items-center justify-center border-2 rounded-lg text-lg font-bold select-none"
+          style={{
+            width: "2.75rem",
+            height: "2.75rem",
+            borderColor: "var(--accent)",
+            backgroundColor: "var(--accent)",
+            color: "#ffffff",
+            opacity: 0,
+            transition: "opacity 0.5s ease-out",
+            transitionDelay: `${i * 80}ms`,
+          }}
+        >
+          {l}
+        </div>
+      ));
+    }
+
+    if (phase === "clue") {
+      return ANSWER.split("").map((_, i) => (
+        <MiniTile key={i} letter="" state="empty" />
+      ));
+    }
+
+    if (typeof phase === "object" && phase.type === "typing-wrong") {
+      return WRONG_GUESS.split("").map((l, i) => (
+        <MiniTile
+          key={i}
+          letter={i < phase.count ? l : ""}
+          state={i < phase.count ? "typing" : "empty"}
+        />
+      ));
+    }
+
+    if (phase === "wrong") {
+      return WRONG_GUESS.split("").map((l, i) => (
+        <MiniTile key={i} letter={l} state="wrong" />
+      ));
+    }
+
+    if (phase === "locked") {
+      return ANSWER.split("").map((_, i) => (
+        <MiniTile
+          key={i}
+          letter={i === 4 ? "T" : ""}
+          state={i === 4 ? "correct-lock" : "empty"}
+        />
+      ));
+    }
+
+    if (typeof phase === "object" && phase.type === "typing-correct") {
+      // Unlocked positions are 0,1,2,3 — T is locked at position 4
+      // The letters to type are O, R, B, I
+      const typingLetters = ["O", "R", "B", "I"];
+      return ANSWER.split("").map((_, i) => {
+        if (i === 4) {
+          return <MiniTile key={i} letter="T" state="correct-lock" delay={0} />;
+        }
+        // i maps to typingLetters index (0→0, 1→1, 2→2, 3→3)
+        if (i < phase.count) {
+          return <MiniTile key={i} letter={typingLetters[i]} state="typing" />;
+        }
+        return <MiniTile key={i} letter="" state="empty" />;
+      });
+    }
+
+    if (phase === "solved") {
+      return ANSWER.split("").map((l, i) => (
+        <MiniTile key={i} letter={l} state="correct" delay={i * 100} />
+      ));
+    }
+
+    return null;
   };
 
   return (
@@ -132,13 +243,18 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
           </p>
 
           <div className="rounded-lg p-4 space-y-3" style={{ backgroundColor: "var(--bg-secondary)" }}>
-            <p className="text-base text-center" style={{ fontFamily: "'Libre Franklin', sans-serif", color: "var(--text)" }}>
-              Path f<span style={{ color: "var(--accent)", fontWeight: 700 }}>_ _ _ _ _</span>s of space debris
-            </p>
-            <div className="flex gap-1.5 justify-center">
-              {renderTiles()}
-            </div>
-            <p className="text-xs text-center">
+            {renderClue()}
+            {!isReveal && (
+              <div className="flex gap-1.5 justify-center">
+                {renderTiles()}
+              </div>
+            )}
+            {isReveal && (
+              <div className="flex gap-1.5 justify-center" style={{ height: "2.75rem" }}>
+                {renderTiles()}
+              </div>
+            )}
+            <p className="text-xs text-center" style={{ opacity: isReveal ? 1 : 0.6, transition: "opacity 0.5s" }}>
               The answer is <strong style={{ color: "var(--accent)" }}>ORBIT</strong> — hidden in &quot;f<strong style={{ color: "var(--accent)" }}>or bit</strong>s&quot;
             </p>
           </div>
