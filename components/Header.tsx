@@ -25,7 +25,7 @@ export default function Header() {
             <h1
               className="text-xl tracking-tight"
               style={{
-                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontFamily: "'Fredoka', sans-serif",
                 color: "var(--text)",
                 fontWeight: 700,
               }}

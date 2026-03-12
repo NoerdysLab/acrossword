@@ -420,7 +420,7 @@ export default function GameBoard({
       <div
         className="text-lg sm:text-xl text-center leading-relaxed max-w-lg px-4"
         style={{
-          fontFamily: "'Libre Franklin', sans-serif",
+          fontFamily: "'Fredoka', sans-serif",
           color: "var(--text)",
           minHeight: "3em",
         }}

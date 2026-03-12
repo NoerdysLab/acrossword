@@ -49,7 +49,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-family: "Fredoka", system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100dvh;
   width: 100%;
