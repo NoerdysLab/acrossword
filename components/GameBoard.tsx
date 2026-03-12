@@ -146,6 +146,7 @@ export default function GameBoard({
   const handleDemoClose = useCallback(() => {
     setShowDemo(false);
     markDemoSeen();
+    inputRef.current?.focus();
   }, []);
 
   const focusInput = useCallback(() => {
