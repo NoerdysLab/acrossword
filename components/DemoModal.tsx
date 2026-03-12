@@ -130,7 +130,7 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
       return (
         <p
           className="text-base text-center sentence-reveal"
-          style={{ fontFamily: "'Fredoka', sans-serif", color: "var(--text)" }}
+          style={{ fontFamily: "'Libre Franklin', sans-serif", color: "var(--text)" }}
         >
           {CLUE_BEFORE}<span style={{ color: "var(--accent)", fontWeight: 700 }}>or bit</span>{CLUE_AFTER}
         </p>
@@ -138,7 +138,7 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
     }
 
     return (
-      <p className="text-base text-center" style={{ fontFamily: "'Fredoka', sans-serif", color: "var(--text)" }}>
+      <p className="text-base text-center" style={{ fontFamily: "'Libre Franklin', sans-serif", color: "var(--text)" }}>
         {CLUE_BEFORE}<span style={{ color: "var(--accent)", fontWeight: 700 }}>_ _ _ _ _</span>{CLUE_AFTER}
       </p>
     );
