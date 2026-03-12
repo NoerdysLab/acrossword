@@ -146,15 +146,7 @@ export default function GameBoard({
   const handleDemoClose = useCallback(() => {
     setShowDemo(false);
     markDemoSeen();
-    inputRef.current?.focus();
   }, []);
-
-  // Focus input
-  useEffect(() => {
-    if (!solved && !showDemo) {
-      inputRef.current?.focus();
-    }
-  }, [solved, showDemo]);
 
   const focusInput = useCallback(() => {
     if (!solved) {
@@ -474,11 +466,13 @@ export default function GameBoard({
           value={currentGuess}
           onChange={handleInput}
           onKeyDown={handleSubmit}
-          autoFocus
           autoComplete="off"
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
+          data-form-type="other"
+          data-lpignore="true"
+          inputMode="none"
           className="game-input"
           aria-label="Type your guess"
         />
