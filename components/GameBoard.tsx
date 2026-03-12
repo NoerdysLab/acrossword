@@ -468,12 +468,13 @@ export default function GameBoard({
           onChange={handleInput}
           onKeyDown={handleSubmit}
           autoComplete="off"
-          autoCapitalize="off"
+          autoCapitalize="characters"
           autoCorrect="off"
           spellCheck={false}
           data-form-type="other"
           data-lpignore="true"
-          inputMode="none"
+          name="acrossword-guess"
+          id="acrossword-guess"
           className="game-input"
           aria-label="Type your guess"
         />
