@@ -35,9 +35,16 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-dvh flex flex-col">
+        {/* Animated mesh gradient background blobs */}
+        <div className="glass-bg-blobs" aria-hidden="true">
+          <div className="glass-blob glass-blob-1" />
+          <div className="glass-blob glass-blob-2" />
+          <div className="glass-blob glass-blob-3" />
+        </div>
+
         <Header />
-        <main className="flex-1" style={{ maxWidth: "42rem", marginLeft: "auto", marginRight: "auto", width: "100%", paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>{children}</main>
-        <footer className="text-center pb-4 pt-2" style={{ color: "var(--text-secondary)", fontSize: "0.7rem", opacity: 0.5 }}>
+        <main className="flex-1" style={{ position: "relative", zIndex: 1, maxWidth: "42rem", marginLeft: "auto", marginRight: "auto", width: "100%", paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "5rem", paddingBottom: "2.5rem" }}>{children}</main>
+        <footer className="text-center pb-4 pt-2" style={{ position: "relative", zIndex: 1, color: "var(--text-secondary)", fontSize: "0.7rem", opacity: 0.5 }}>
           v1.4.0
         </footer>
       </body>
