@@ -413,6 +413,20 @@ body {
   pointer-events: none;
 }
 
+/* Logo link */
+.glass-logo {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.glass-logo:active {
+  transform: scale(0.92);
+}
+
 /* Vertical divider */
 .glass-divider {
   width: 1px;
