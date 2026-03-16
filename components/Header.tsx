@@ -9,7 +9,7 @@ import DemoModal from "./DemoModal";
 export default function Header() {
   const [statsOpen, setStatsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const [activeIndex, setActiveIndex] = useState(0); // 0 = logo/home
   const navRef = useRef<HTMLDivElement>(null);
   const glassRef = useRef<HTMLElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
@@ -30,13 +30,8 @@ export default function Header() {
   const updatePill = useCallback(() => {
     const container = navRef.current;
     const pill = pillRef.current;
-    if (!container || !pill) return;
     const btn = btnRefs.current[activeIndex];
-    if (!btn || activeIndex < 0) {
-      pill.style.opacity = "0";
-      pill.style.width = "0px";
-      return;
-    }
+    if (!container || !pill || !btn) return;
     pill.style.opacity = "1";
     const containerRect = container.getBoundingClientRect();
     const btnRect = btn.getBoundingClientRect();
@@ -114,10 +109,14 @@ export default function Header() {
         <div className="glass-glare" />
 
         <div className="glass-nav-inner" ref={navRef}>
-          {/* Logo */}
+          {/* Sliding active pill */}
+          <div ref={pillRef} className="glass-pill" />
+
+          {/* Logo — index 0 in the pill system */}
           <Link
             href="/"
-            className="glass-logo"
+            ref={(el) => { btnRefs.current[0] = el; }}
+            className={`glass-nav-btn glass-logo-btn ${activeIndex === 0 ? "active" : ""}`}
             onClick={() => setActiveIndex(0)}
             style={{ textDecoration: "none" }}
           >
@@ -126,10 +125,8 @@ export default function Header() {
                 fontFamily: "'DM Serif Display', Georgia, serif",
                 fontSize: "16px",
                 fontWeight: 700,
-                color: "var(--glass-text)",
                 letterSpacing: "0.01em",
                 whiteSpace: "nowrap",
-                transition: "color 0.3s ease",
               }}
             >
               <span style={{ letterSpacing: "0.02em" }}>ACROSS</span>word
@@ -139,18 +136,16 @@ export default function Header() {
           {/* Divider after logo */}
           <div className="glass-divider" />
 
-          {/* Sliding active pill */}
-          <div ref={pillRef} className="glass-pill" />
-
           {navItems.map((item, i) => {
+            const idx = i + 1; // offset by 1 since logo is index 0
             const isLink = !!item.href;
             const Tag = isLink ? Link : "button";
             const props: Record<string, unknown> = {
               key: item.label,
-              ref: (el: HTMLElement | null) => { btnRefs.current[i] = el; },
-              className: `glass-nav-btn ${activeIndex === i ? "active" : ""}`,
+              ref: (el: HTMLElement | null) => { btnRefs.current[idx] = el; },
+              className: `glass-nav-btn ${activeIndex === idx ? "active" : ""}`,
               onClick: () => {
-                setActiveIndex(i);
+                setActiveIndex(idx);
                 item.onClick?.();
               },
               "aria-label": item.label,
