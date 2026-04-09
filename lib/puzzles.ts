@@ -28,7 +28,11 @@ export function getTodayDay(): number {
 }
 
 export function getPuzzle(day: number): Puzzle | undefined {
-  return (puzzlesData as Puzzle[]).find((p) => p.day === day);
+  const puzzles = puzzlesData as Puzzle[];
+  if (puzzles.length === 0) return undefined;
+  // Loop back to the beginning when we run out of puzzles
+  const idx = ((day - 1) % puzzles.length + puzzles.length) % puzzles.length;
+  return { ...puzzles[idx], day };
 }
 
 export function getPublicPuzzle(day: number): PublicPuzzle | undefined {
@@ -43,14 +47,12 @@ export function getPublicPuzzle(day: number): PublicPuzzle | undefined {
 }
 
 export function getAllPublicPuzzles(upToDay: number): PublicPuzzle[] {
-  return (puzzlesData as Puzzle[])
-    .filter((p) => p.day <= upToDay)
-    .map((p) => ({
-      day: p.day,
-      clue: p.clue,
-      completedSentence: p.completedSentence,
-      length: p.length,
-    }));
+  const result: PublicPuzzle[] = [];
+  for (let d = 1; d <= upToDay; d++) {
+    const p = getPublicPuzzle(d);
+    if (p) result.push(p);
+  }
+  return result;
 }
 
 export function checkAnswer(day: number, guess: string): boolean {
