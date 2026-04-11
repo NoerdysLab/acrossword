@@ -48,7 +48,8 @@ export function getPublicPuzzle(day: number): PublicPuzzle | undefined {
 
 export function getAllPublicPuzzles(upToDay: number): PublicPuzzle[] {
   const result: PublicPuzzle[] = [];
-  for (let d = 1; d <= upToDay; d++) {
+  const startDay = Math.max(1, upToDay - 4); // only show last 5 days
+  for (let d = startDay; d <= upToDay; d++) {
     const p = getPublicPuzzle(d);
     if (p) result.push(p);
   }
