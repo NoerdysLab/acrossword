@@ -35,7 +35,7 @@ The answer is hidden across word boundaries inside the clue itself, like a crypt
 
 - **Core loop:** the clue shows five blanks; the player types a 5-letter guess into tiles and submits it (Enter or the Submit button). Guesses are unlimited.
 - **Feedback:** letters in the correct position lock in, Wordle-style, and stay filled for later guesses. There is no "wrong position" feedback.
-- **Solve:** the tiles confirm, the clue becomes the completed sentence with the answer highlighted, and confetti plays.
+- **Solve:** the tiles confirm, then the gap closes into the completed sentence: the real word space opens inside the answer and a teal rule sweeps across it.
 - **Share:** "Copy results" puts an emoji grid on the clipboard (🟦 for correct letters, ⬜ or ⬛ for the rest, matching the theme), plus the day number, current streak, and ACROSSword.org. The grid must never reveal the answer.
 - **Stats:** puzzles solved, current streak, max streak, and guess distribution.
 - **Archive:** shows the last 5 days; recent days within the playable window can still be played.

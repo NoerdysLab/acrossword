@@ -266,7 +266,7 @@ export default function GameBoard({ day, clue, completedSentence, length }: Game
 
   const hint =
     openCount === length
-      ? "Tap the tiles and type a 5-letter word."
+      ? "Type a 5-letter word to fill the gap."
       : `Type the ${openCount} missing ${openCount === 1 ? "letter" : "letters"}.`;
 
   const resultRows = [...guesses, solvedAnswer || answer];
@@ -350,7 +350,7 @@ export default function GameBoard({ day, clue, completedSentence, length }: Game
       )}
 
       {phase === "solved" && (
-        <section aria-label="Result" className={animateSolve ? "fade-up" : undefined} style={{ marginTop: "2rem", animationDelay: animateSolve ? "420ms" : undefined }}>
+        <section aria-label="Result" className={animateSolve ? "fade-up" : undefined} style={{ marginTop: "1.75rem", paddingTop: "1.25rem", borderTop: "1px solid var(--rule)", animationDelay: animateSolve ? "420ms" : undefined }}>
           <div className="flex items-end justify-between gap-4">
             <div>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 700, letterSpacing: "-0.01em" }}>

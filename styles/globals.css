@@ -23,7 +23,7 @@
   --ink-2: #4a4f57;
   --ink-3: #676d76;
   --rule: #dde0e3;
-  --rule-strong: #b8bdc3;
+  --rule-strong: #8e949b;
   --spot: #23968e;
   --spot-ink: #16756e;
   --spot-wash: rgba(35, 150, 142, 0.14);
@@ -47,7 +47,7 @@
   --ink-2: #aab0b7;
   --ink-3: #8a9199;
   --rule: #2a2e33;
-  --rule-strong: #444a51;
+  --rule-strong: #646b73;
   --spot: #2aa198;
   --spot-ink: #52c4b9;
   --spot-wash: rgba(82, 196, 185, 0.16);
@@ -144,6 +144,7 @@ a {
 .clue--sm {
   font-size: 1.125rem;
   line-height: 1.35;
+  color: inherit;
 }
 
 @media (min-width: 640px) {

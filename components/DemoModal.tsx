@@ -125,10 +125,9 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
         aria-hidden="true"
         style={{
           marginTop: "1rem",
-          padding: "1rem",
-          borderRadius: 10,
-          border: "1px solid var(--rule)",
-          background: "var(--paper)",
+          padding: "1rem 0",
+          borderTop: "1px solid var(--rule)",
+          borderBottom: "1px solid var(--rule)",
         }}
       >
         <ClueLine

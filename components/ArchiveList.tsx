@@ -5,6 +5,9 @@ import Link from "next/link";
 import { getSolvedData, type SolvedEntry } from "@/lib/storage";
 import { PLAYABLE_WINDOW } from "@/lib/constants";
 import { puzzleDateLabel } from "@/lib/dates";
+import ClueLine from "./ClueLine";
+
+const EMPTY_SLOTS = Array.from({ length: 5 }, () => ({ letter: "", state: "empty" as const }));
 
 interface ArchiveListProps {
   todayDay: number;
@@ -22,20 +25,6 @@ const icon = {
   strokeLinejoin: "round" as const,
   "aria-hidden": true,
 };
-
-function ClueText({ clue }: { clue: string }) {
-  const [before, after = ""] = clue.split("_ _ _ _ _");
-  return (
-    <>
-      {before}
-      <span className="sr-only">[five-letter gap]</span>
-      <span aria-hidden="true" style={{ letterSpacing: "0.12em", color: "var(--ink-3)" }}>
-        _____
-      </span>
-      {after}
-    </>
-  );
-}
 
 export default function ArchiveList({ todayDay, puzzles }: ArchiveListProps) {
   const [solved, setSolved] = useState<Record<string, SolvedEntry>>({});
@@ -55,12 +44,10 @@ export default function ArchiveList({ todayDay, puzzles }: ArchiveListProps) {
 
           const body = (
             <div className="flex items-center gap-4" style={{ padding: "0.875rem 0", minHeight: "4.5rem" }}>
-              <div className="flex-1 min-w-0">
-                <p className="tabular" style={{ fontSize: "0.8125rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ink-3)" }}>
-                  Day {p.day} · {isToday ? <span style={{ color: "var(--spot-ink)" }}>Today</span> : puzzleDateLabel(p.day)}
-                </p>
-                <p className="truncate" style={{ marginTop: "0.25rem", fontSize: "1rem", fontWeight: 500, color: playable ? "var(--ink)" : "var(--ink-3)" }}>
-                  <ClueText clue={p.clue} />
+              <div className="flex-1 min-w-0" style={{ color: playable ? "var(--ink)" : "var(--ink-3)" }}>
+                <ClueLine size="sm" clue={p.clue} slots={EMPTY_SLOTS} />
+                <p className="tabular" style={{ marginTop: "0.375rem", fontSize: "0.8125rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ink-3)" }}>
+                  Day {p.day} · {isToday ? <span style={{ color: "var(--ink)" }}>Today</span> : puzzleDateLabel(p.day)}
                 </p>
               </div>
               <span className="flex items-center gap-1.5 shrink-0" style={{ fontSize: "0.875rem", fontWeight: 600, color: isSolved ? "var(--spot-ink)" : "var(--ink-3)" }}>

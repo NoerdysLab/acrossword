@@ -57,7 +57,7 @@ export default function StatsModal({ open, onClose }: StatsModalProps) {
                           display: "block",
                           height: "100%",
                           borderRadius: 2,
-                          background: "var(--spot)",
+                          background: "var(--ink-2)",
                           transformOrigin: "left center",
                           transform: `scaleX(${count / max})`,
                         }}
