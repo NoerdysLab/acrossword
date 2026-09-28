@@ -1,0 +1,787 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-28T23:43:48+00:00",
+  "title": "Design System: ACROSSword",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Cool Paper",
+        "canonical": "#f6f7f7",
+        "cssVar": "--paper",
+        "theme": "light",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242525",
+          "#414242",
+          "#606161",
+          "#818282",
+          "#a4a5a5",
+          "#c8c9c9",
+          "#eeefef"
+        ]
+      },
+      "paper-raised": {
+        "role": "neutral",
+        "displayName": "Raised Stock",
+        "canonical": "#ffffff",
+        "cssVar": "--paper-raised",
+        "theme": "light",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#15171a",
+        "cssVar": "--ink",
+        "theme": "light",
+        "tonalRamp": [
+          "#090b0e",
+          "#232528",
+          "#404246",
+          "#5f6165",
+          "#808286",
+          "#a2a5a9",
+          "#c6c9ce",
+          "#eceff3"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "#4a4f57",
+        "cssVar": "--ink-2",
+        "theme": "light",
+        "tonalRamp": [
+          "#080b11",
+          "#21252c",
+          "#3d424a",
+          "#5c626a",
+          "#7d838b",
+          "#a0a5af",
+          "#c4cad3",
+          "#e9eff9"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "#676d76",
+        "cssVar": "--ink-3",
+        "theme": "light",
+        "tonalRamp": [
+          "#070b12",
+          "#20252d",
+          "#3d424b",
+          "#5c626a",
+          "#7d838c",
+          "#9fa6af",
+          "#c3cad4",
+          "#e8eff9"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#dde0e3",
+        "cssVar": "--rule",
+        "theme": "light",
+        "tonalRamp": [
+          "#090b0d",
+          "#232527",
+          "#404245",
+          "#5f6164",
+          "#808385",
+          "#a2a5a8",
+          "#c6c9cc",
+          "#eceff2"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Rule Strong",
+        "canonical": "#8e949b",
+        "cssVar": "--rule-strong",
+        "theme": "light",
+        "tonalRamp": [
+          "#080c10",
+          "#21262b",
+          "#3d4349",
+          "#5c6268",
+          "#7d838a",
+          "#a0a6ad",
+          "#c3cad1",
+          "#e9eff7"
+        ]
+      },
+      "spot": {
+        "role": "primary",
+        "displayName": "Spot Teal",
+        "canonical": "#23968e",
+        "cssVar": "--spot",
+        "theme": "light",
+        "tonalRamp": [
+          "#000f0d",
+          "#012c29",
+          "#024d48",
+          "#08706a",
+          "#21958d",
+          "#4fb9b0",
+          "#76ded5",
+          "#b7fff7"
+        ]
+      },
+      "spot-ink": {
+        "role": "primary",
+        "displayName": "Spot Ink",
+        "canonical": "#16756e",
+        "cssVar": "--spot-ink",
+        "theme": "light",
+        "tonalRamp": [
+          "#000f0d",
+          "#012c29",
+          "#044d48",
+          "#0c7069",
+          "#3c928b",
+          "#62b6ae",
+          "#87dbd2",
+          "#b7fff7"
+        ]
+      },
+      "spot-wash": {
+        "role": "primary",
+        "displayName": "Spot Wash",
+        "canonical": "rgba(35, 150, 142, 0.14)",
+        "cssVar": "--spot-wash",
+        "theme": "light",
+        "tonalRamp": [
+          "#000f0d",
+          "#012c29",
+          "#024d48",
+          "#08706a",
+          "#21958d",
+          "#4fb9b0",
+          "#76ded5",
+          "#b7fff7"
+        ]
+      },
+      "on-spot": {
+        "role": "primary",
+        "displayName": "On Spot",
+        "canonical": "#ffffff",
+        "cssVar": "--on-spot",
+        "theme": "light",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Scrim",
+        "canonical": "rgba(21, 23, 26, 0.38)",
+        "cssVar": "--scrim",
+        "theme": "light",
+        "tonalRamp": [
+          "#090b0e",
+          "#232528",
+          "#404246",
+          "#5f6165",
+          "#808286",
+          "#a2a5a9",
+          "#c6c9ce",
+          "#eceff3"
+        ]
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "Cool Paper (dark)",
+        "canonical": "#121416",
+        "cssVar": "--paper",
+        "theme": "dark",
+        "tonalRamp": [
+          "#090b0d",
+          "#232527",
+          "#404245",
+          "#5f6164",
+          "#808385",
+          "#a3a5a8",
+          "#c7c9cc",
+          "#eceff2"
+        ]
+      },
+      "paper-raised-dark": {
+        "role": "neutral",
+        "displayName": "Raised Stock (dark)",
+        "canonical": "#1b1e21",
+        "cssVar": "--paper-raised",
+        "theme": "dark",
+        "tonalRamp": [
+          "#090b0e",
+          "#222529",
+          "#3f4246",
+          "#5e6265",
+          "#7f8387",
+          "#a2a5a9",
+          "#c5cace",
+          "#ebeff3"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Ink (dark)",
+        "canonical": "#eceeef",
+        "cssVar": "--ink",
+        "theme": "dark",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#242526",
+          "#414243",
+          "#606162",
+          "#818383",
+          "#a3a5a6",
+          "#c7c9ca",
+          "#edeff0"
+        ]
+      },
+      "ink-2-dark": {
+        "role": "neutral",
+        "displayName": "Ink 2 (dark)",
+        "canonical": "#aab0b7",
+        "cssVar": "--ink-2",
+        "theme": "dark",
+        "tonalRamp": [
+          "#080c10",
+          "#21262b",
+          "#3d4348",
+          "#5c6268",
+          "#7d838a",
+          "#a0a6ad",
+          "#c4cad1",
+          "#e9eff7"
+        ]
+      },
+      "ink-3-dark": {
+        "role": "neutral",
+        "displayName": "Ink 3 (dark)",
+        "canonical": "#8a9199",
+        "cssVar": "--ink-3",
+        "theme": "dark",
+        "tonalRamp": [
+          "#070c11",
+          "#20262c",
+          "#3d434a",
+          "#5b6269",
+          "#7c838b",
+          "#9fa6ae",
+          "#c3cad2",
+          "#e8eff8"
+        ]
+      },
+      "rule-dark": {
+        "role": "neutral",
+        "displayName": "Rule (dark)",
+        "canonical": "#2a2e33",
+        "cssVar": "--rule",
+        "theme": "dark",
+        "tonalRamp": [
+          "#080b10",
+          "#22252a",
+          "#3e4248",
+          "#5d6267",
+          "#7e8389",
+          "#a1a5ac",
+          "#c4cad0",
+          "#eaeff6"
+        ]
+      },
+      "rule-strong-dark": {
+        "role": "neutral",
+        "displayName": "Rule Strong (dark)",
+        "canonical": "#646b73",
+        "cssVar": "--rule-strong",
+        "theme": "dark",
+        "tonalRamp": [
+          "#070c11",
+          "#20262c",
+          "#3c434a",
+          "#5b626a",
+          "#7c838b",
+          "#9ea6af",
+          "#c2cad3",
+          "#e7eff9"
+        ]
+      },
+      "spot-dark": {
+        "role": "primary",
+        "displayName": "Spot Teal (dark)",
+        "canonical": "#2aa198",
+        "cssVar": "--spot",
+        "theme": "dark",
+        "tonalRamp": [
+          "#000f0d",
+          "#022c29",
+          "#054d48",
+          "#0c7069",
+          "#16968d",
+          "#4abab0",
+          "#72dfd5",
+          "#b7fff7"
+        ]
+      },
+      "spot-ink-dark": {
+        "role": "primary",
+        "displayName": "Spot Ink (dark)",
+        "canonical": "#52c4b9",
+        "cssVar": "--spot-ink",
+        "theme": "dark",
+        "tonalRamp": [
+          "#000f0d",
+          "#002c29",
+          "#014d47",
+          "#067069",
+          "#0d968c",
+          "#47baaf",
+          "#70dfd4",
+          "#bafef6"
+        ]
+      },
+      "spot-wash-dark": {
+        "role": "primary",
+        "displayName": "Spot Wash (dark)",
+        "canonical": "rgba(82, 196, 185, 0.16)",
+        "cssVar": "--spot-wash",
+        "theme": "dark",
+        "tonalRamp": [
+          "#000f0d",
+          "#002c29",
+          "#014d47",
+          "#067069",
+          "#0d968c",
+          "#47baaf",
+          "#70dfd4",
+          "#bafef6"
+        ]
+      },
+      "on-spot-dark": {
+        "role": "primary",
+        "displayName": "On Spot (dark)",
+        "canonical": "#ffffff",
+        "cssVar": "--on-spot",
+        "theme": "dark",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "scrim-dark": {
+        "role": "neutral",
+        "displayName": "Scrim (dark)",
+        "canonical": "rgba(0, 0, 0, 0.6)",
+        "cssVar": "--scrim",
+        "theme": "dark",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Header wordmark only. 'ACROSS' tracked to 0.03em, 'word' lowercase.",
+        "source": ".wordmark"
+      },
+      "display": {
+        "displayName": "Display / Clue",
+        "purpose": "The clue line on the puzzle page (h1). Steps to 1.875rem at >=640px. text-wrap: pretty.",
+        "responsive": {
+          "min-width: 640px": "1.875rem"
+        },
+        "source": ".clue"
+      },
+      "display-sm": {
+        "displayName": "Display small",
+        "purpose": "Clue lines in archive rows and the How to Play demo. Steps to 1.1875rem at >=640px.",
+        "responsive": {
+          "min-width: 640px": "1.1875rem"
+        },
+        "source": ".clue--sm"
+      },
+      "sort": {
+        "displayName": "Sort letter",
+        "purpose": "Uppercase letters on the tiles. Steps to 2rem at >=640px.",
+        "responsive": {
+          "min-width: 640px": "2rem"
+        },
+        "source": ".sort"
+      },
+      "sort-sm": {
+        "displayName": "Sort letter small",
+        "purpose": "Tiles in the How to Play demo.",
+        "source": ".stick--sm .sort"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles (Archive). Notice titles use 1.5rem / -0.01em.",
+        "source": "app/archive/page.tsx inline"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Dialog titles and the 'Solved in N guesses' heading.",
+        "source": "Dialog.tsx, GameBoard.tsx inline"
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Stat numbers in the Statistics dialog, tabular.",
+        "source": "StatsModal.tsx inline"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Dialog copy.",
+        "source": "DemoModal.tsx inline"
+      },
+      "body-sm": {
+        "displayName": "Body small",
+        "purpose": "Status line, secondary copy, archive intro.",
+        "source": "inline"
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Button labels, sentence case.",
+        "source": ".btn"
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Countdown, demo captions, archive status, icon-button labels.",
+        "source": ".icon-btn, inline"
+      },
+      "dateline": {
+        "displayName": "Dateline",
+        "purpose": "Uppercase 'DAY N · WEEKDAY, MON D' line directly under a clue. Never used above a heading.",
+        "source": "GameBoard.tsx, ArchiveList.tsx inline"
+      },
+      "guess-trail": {
+        "displayName": "Guess trail",
+        "purpose": "Previous guesses as spaced type; correct letters in Spot Ink at 700.",
+        "source": "GameBoard.tsx inline"
+      }
+    },
+    "themes": {
+      "mechanism": "All colors are custom properties on :root (light) and :root[data-theme=\"dark\"] (dark) in styles/globals.css. An inline script in app/layout.tsx sets data-theme before paint from localStorage 'acrossword-theme', falling back to prefers-color-scheme.",
+      "source": "styles/globals.css"
+    },
+    "shadows": [
+      {
+        "name": "pressed-edge",
+        "value": "inset 0 -2px 0 var(--rule)",
+        "purpose": "Foot of an empty or typed sort."
+      },
+      {
+        "name": "pressed-edge-spot",
+        "value": "inset 0 -2px 0 rgba(0, 0, 0, 0.16)",
+        "purpose": "Foot of a locked or solved sort."
+      },
+      {
+        "name": "hairline",
+        "value": "1px solid var(--rule)",
+        "purpose": "Every divider: header bottom, section tops, list rows, stat cells, dialog border. A border, not a shadow; listed because it is the system's depth device."
+      },
+      {
+        "name": "focus-ring",
+        "value": "outline: 2px solid var(--spot); outline-offset: 2px; border-radius: 6px",
+        "purpose": "Global :focus-visible."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.25, 1, 0.5, 1)",
+        "purpose": "All transitions and animations except the error shake. Settles without overshoot."
+      },
+      {
+        "name": "ease-shake",
+        "value": "ease-in-out",
+        "purpose": "Wrong-guess shake only."
+      },
+      {
+        "name": "duration-press",
+        "value": "120ms",
+        "purpose": "Button and icon-button press scale (0.98 / 0.94)."
+      },
+      {
+        "name": "duration-set",
+        "value": "140ms",
+        "purpose": "Letter sets into a sort: scale 0.9 to 1."
+      },
+      {
+        "name": "duration-color",
+        "value": "150ms",
+        "purpose": "Color, border, and background changes on controls, slots, and sorts."
+      },
+      {
+        "name": "duration-scrim",
+        "value": "180ms",
+        "purpose": "Dialog scrim fade-in."
+      },
+      {
+        "name": "duration-theme",
+        "value": "200ms",
+        "purpose": "Body background/color on theme change; sort background; theme icon opacity."
+      },
+      {
+        "name": "duration-enter",
+        "value": "240ms",
+        "purpose": "Bottom sheet (translateY 24px), centered panel (translateY 8px), result fade-up (6px), nav rule slide."
+      },
+      {
+        "name": "duration-lock",
+        "value": "260ms",
+        "purpose": "Sort press on lock or solve (scale 1, 0.92, 1); theme icon rotate/scale."
+      },
+      {
+        "name": "duration-shake",
+        "value": "320ms",
+        "purpose": "Wrong-guess shake, translateX ±4px."
+      },
+      {
+        "name": "duration-close-up",
+        "value": "360ms",
+        "purpose": "Found word opens its inner word space (0 to 0.26em) and inks from Ink to Spot Ink."
+      },
+      {
+        "name": "duration-rule-draw",
+        "value": "560ms",
+        "purpose": "Teal rule draws under the found word, scaleX 0 to 1 from the left, after a 260ms delay."
+      },
+      {
+        "name": "stagger-solve",
+        "value": "60ms",
+        "purpose": "Per-sort delay when the solved sorts press in sequence."
+      },
+      {
+        "name": "delay-result",
+        "value": "420ms",
+        "purpose": "Result block fade-up delay after solve."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation-duration: 1ms; animation-delay: 0ms; transition-duration: 1ms",
+        "purpose": "prefers-reduced-motion: reduce collapses all motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "640px",
+        "purpose": "Measure 24rem to 28rem; clue, small clue, and sort letters step up; dialog becomes a centered panel."
+      }
+    ],
+    "fonts": [
+      {
+        "family": "Libre Franklin",
+        "file": "public/fonts/libre-franklin-latin-var.woff2",
+        "weights": "400 700",
+        "display": "swap",
+        "preload": true
+      },
+      {
+        "family": "DM Serif Display",
+        "file": "public/fonts/dm-serif-display-latin-400.woff2",
+        "weights": "400",
+        "display": "swap",
+        "preload": true
+      }
+    ],
+    "icons": {
+      "style": "Inline SVG line icons, 24-unit viewBox, stroke-width 1.75 (2 for check marks), round caps and joins, currentColor.",
+      "sizes": {
+        "header": "22px",
+        "inline": "20px",
+        "button": "18px"
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Sort",
+      "kind": "custom",
+      "refersTo": "sort",
+      "description": "Square type-sort tile in the five-column stick; empty, next, typed, and locked states.",
+      "html": "<div class=\"ds-stick\"><div class=\"ds-sort ds-sort--locked\">T</div><div class=\"ds-sort ds-sort--locked\">H</div><div class=\"ds-sort ds-sort--typed\">U</div><div class=\"ds-sort ds-sort--next\"></div><div class=\"ds-sort\"></div></div>",
+      "css": ".ds-stick { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.625rem; max-width: 22.375rem; } .ds-sort { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--rule-strong); border-radius: 6px; background: var(--paper-raised); box-shadow: inset 0 -2px 0 var(--rule); color: var(--ink); font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 1.75rem; font-weight: 700; line-height: 1; text-transform: uppercase; transition: background-color 200ms cubic-bezier(0.25, 1, 0.5, 1), border-color 150ms cubic-bezier(0.25, 1, 0.5, 1), color 150ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-sort--next { border-color: var(--ink-3); } .ds-sort--typed { border-color: var(--ink); } .ds-sort--locked { background: var(--spot); border-color: var(--spot); color: var(--on-spot); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.16); }"
+    },
+    {
+      "name": "Clue line",
+      "kind": "custom",
+      "refersTo": "clue-line",
+      "description": "The clue as display type with an inline five-slot gap that mirrors the sorts; locked letters print in Spot Ink.",
+      "html": "<p class=\"ds-clue\">Digit useful <span style=\"white-space:nowrap\">wi<span class=\"ds-slot ds-slot--locked\">T</span><span class=\"ds-slot ds-slot--locked\">H</span><span class=\"ds-slot ds-slot--typed\">U</span><span class=\"ds-slot ds-slot--next\">&nbsp;</span><span class=\"ds-slot\">&nbsp;</span>rellas</span></p>",
+      "css": ".ds-clue { font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 1.625rem; line-height: 1.3; font-weight: 500; letter-spacing: -0.012em; color: var(--ink); text-wrap: pretty; margin: 0; } .ds-slot { display: inline-block; width: 0.68em; margin: 0 0.035em; border-bottom: 0.08em solid var(--rule-strong); text-align: center; font-weight: 700; text-transform: uppercase; line-height: 1.1; color: var(--ink); transition: border-color 150ms cubic-bezier(0.25, 1, 0.5, 1), color 150ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-slot--next { border-bottom-color: var(--ink-3); } .ds-slot--typed { border-bottom-color: var(--ink); } .ds-slot--locked { color: var(--spot-ink); border-bottom-color: var(--spot); }"
+    },
+    {
+      "name": "Found word",
+      "kind": "custom",
+      "refersTo": "found-word",
+      "description": "Solved state of the clue: the hidden word in Spot Ink with its real word space opened and a teal rule drawn under it.",
+      "html": "<p class=\"ds-clue\">Digit useful wi<span class=\"ds-found\">th<span class=\"ds-found-space\"> </span>umb</span>rellas</p>",
+      "css": ".ds-clue { font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 1.625rem; line-height: 1.3; font-weight: 500; letter-spacing: -0.012em; color: var(--ink); margin: 0; } .ds-found { position: relative; color: var(--spot-ink); font-weight: 700; animation: ds-ink-in 360ms cubic-bezier(0.25, 1, 0.5, 1) both; } .ds-found::after { content: ''; position: absolute; left: 0; right: 0; bottom: -0.06em; height: 0.08em; background: var(--spot); border-radius: 1px; transform-origin: left center; animation: ds-rule-draw 560ms cubic-bezier(0.25, 1, 0.5, 1) 260ms both; } .ds-found-space { display: inline-block; width: 0.26em; animation: ds-space-open 360ms cubic-bezier(0.25, 1, 0.5, 1) both; } @keyframes ds-rule-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } } @keyframes ds-space-open { from { width: 0; } to { width: 0.26em; } } @keyframes ds-ink-in { from { color: var(--ink); } to { color: var(--spot-ink); } }"
+    },
+    {
+      "name": "Ink button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Primary full-width action: Submit, Copy result, Play.",
+      "html": "<button class=\"ds-btn ds-btn--ink\">Submit</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; min-height: 3.25rem; padding: 0 1.5rem; border-radius: 8px; border: 1.5px solid transparent; font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.005em; cursor: pointer; transition: background-color 150ms cubic-bezier(0.25, 1, 0.5, 1), border-color 150ms cubic-bezier(0.25, 1, 0.5, 1), color 150ms cubic-bezier(0.25, 1, 0.5, 1), transform 120ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-btn:active { transform: scale(0.98); } .ds-btn:focus-visible { outline: 2px solid var(--spot); outline-offset: 2px; } .ds-btn--ink { background: var(--ink); color: var(--paper); } .ds-btn--ink:hover { background: color-mix(in srgb, var(--ink) 86%, var(--paper)); }"
+    },
+    {
+      "name": "Ink button, disabled",
+      "kind": "button",
+      "refersTo": "button-ink-disabled",
+      "description": "Resting Submit before five letters are in: outline only.",
+      "html": "<button class=\"ds-btn-off\" disabled>Submit</button>",
+      "css": ".ds-btn-off { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 3.25rem; padding: 0 1.5rem; border-radius: 8px; background: transparent; border: 1.5px solid var(--rule-strong); color: var(--ink-3); font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.005em; cursor: default; }"
+    },
+    {
+      "name": "Line button",
+      "kind": "button",
+      "refersTo": "button-line",
+      "description": "Secondary action, e.g. 'Go to the archive' on a locked or missing day.",
+      "html": "<button class=\"ds-btn-line\">Go to the archive</button>",
+      "css": ".ds-btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 3.25rem; padding: 0 1.5rem; border-radius: 8px; background: transparent; border: 1.5px solid var(--rule-strong); color: var(--ink); font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.005em; cursor: pointer; transition: border-color 150ms cubic-bezier(0.25, 1, 0.5, 1), transform 120ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-btn-line:hover { border-color: var(--ink-2); } .ds-btn-line:active { transform: scale(0.98); } .ds-btn-line:focus-visible { outline: 2px solid var(--spot); outline-offset: 2px; }"
+    },
+    {
+      "name": "Header bar",
+      "kind": "nav",
+      "refersTo": "icon-button",
+      "description": "Hairline-ruled 56px bar: serif wordmark as the home link, four 44px icon controls, and a 2px ink rule under the current item.",
+      "html": "<header class=\"ds-bar\"><div class=\"ds-bar-in\"><a class=\"ds-icon-btn ds-home\" href=\"#\"><span class=\"ds-wordmark\"><b>ACROSS</b>word</span><span class=\"ds-nav-rule\"></span></a><nav class=\"ds-nav\"><a class=\"ds-icon-btn\" href=\"#\" aria-label=\"Archive\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg></a><button class=\"ds-icon-btn\" aria-label=\"Statistics\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20v-6M12 20V4M18 20v-10\"/></svg></button><button class=\"ds-icon-btn\" aria-label=\"How to play\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.3-2.4 2.3\"/><path d=\"M12 16.6h.01\"/></svg></button><span class=\"ds-divider\"></span><button class=\"ds-icon-btn\" aria-label=\"Switch to dark mode\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.6 6.6 0 0 0 10.7 10.7z\"/></svg></button></nav></div></header>",
+      "css": ".ds-bar { border-bottom: 1px solid var(--rule); background: var(--paper); } .ds-bar-in { position: relative; display: flex; align-items: center; justify-content: space-between; max-width: calc(24rem + 2rem); margin: 0 auto; padding: 0 1rem; height: 3.5rem; } .ds-nav { display: flex; align-items: center; margin-right: -0.625rem; } .ds-home { margin-left: -0.625rem; text-decoration: none; } .ds-icon-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; height: 2.75rem; padding: 0 0.625rem; border: 0; border-radius: 8px; background: transparent; color: var(--ink-2); cursor: pointer; transition: color 150ms cubic-bezier(0.25, 1, 0.5, 1), background-color 150ms cubic-bezier(0.25, 1, 0.5, 1), transform 120ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-icon-btn:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); } .ds-icon-btn:active { transform: scale(0.94); } .ds-icon-btn:focus-visible { outline: 2px solid var(--spot); outline-offset: 2px; border-radius: 6px; } .ds-wordmark { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; font-size: 1.375rem; line-height: 1; letter-spacing: 0.005em; color: var(--ink); } .ds-wordmark b { font-weight: 400; letter-spacing: 0.03em; } .ds-nav-rule { position: absolute; left: 0.625rem; right: 0.625rem; bottom: -0.375rem; height: 2px; background: var(--ink); } .ds-divider { width: 1px; height: 20px; background: var(--rule); margin: 0 0.25rem; }"
+    },
+    {
+      "name": "Dateline",
+      "kind": "custom",
+      "refersTo": "dateline",
+      "description": "Tracked-caps day and date line placed directly under the clue it dates.",
+      "html": "<p class=\"ds-dateline\">Day 204 · Mon, Sep 28</p>",
+      "css": ".ds-dateline { margin: 0; font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--ink-3); }"
+    },
+    {
+      "name": "Dialog sheet",
+      "kind": "card",
+      "refersTo": "dialog-sheet",
+      "description": "Phone bottom sheet for How to Play and Statistics: raised stock over a scrim, hairline top edge, no shadow.",
+      "html": "<div class=\"ds-sheet\"><div class=\"ds-sheet-head\"><h2 class=\"ds-sheet-title\">Statistics</h2></div><dl class=\"ds-stats\"><div><dt>Solved</dt><dd>12</dd></div><div><dt>Streak</dt><dd>4</dd></div><div><dt>Best streak</dt><dd>9</dd></div></dl></div>",
+      "css": ".ds-sheet { max-width: 24rem; background: var(--paper-raised); color: var(--ink); border-top: 1px solid var(--rule); border-radius: 14px 14px 0 0; padding: 1.25rem 1.25rem 1.5rem; font-family: 'Libre Franklin', system-ui, sans-serif; animation: ds-sheet-in 240ms cubic-bezier(0.25, 1, 0.5, 1) both; } .ds-sheet-head { margin-bottom: 1rem; } .ds-sheet-title { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; } .ds-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); } .ds-stats > div { padding: 0.875rem 0 0.875rem 1rem; border-left: 1px solid var(--rule); } .ds-stats > div:first-child { padding-left: 0; border-left: 0; } .ds-stats dt { font-size: 0.8125rem; color: var(--ink-3); } .ds-stats dd { margin: 0; font-size: 1.75rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; } @keyframes ds-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }"
+    },
+    {
+      "name": "Archive row",
+      "kind": "custom",
+      "refersTo": "clue-line",
+      "description": "Ruled list row: small clue line with its dateline, and a Play / Solved / Locked status on the right.",
+      "html": "<a class=\"ds-row\" href=\"#\"><div class=\"ds-row-main\"><p class=\"ds-row-clue\">Path f<span class=\"ds-row-slot\">&nbsp;</span><span class=\"ds-row-slot\">&nbsp;</span><span class=\"ds-row-slot\">&nbsp;</span><span class=\"ds-row-slot\">&nbsp;</span><span class=\"ds-row-slot\">&nbsp;</span>s of space debris</p><p class=\"ds-row-date\">Day 201 · Fri, Sep 25</p></div><span class=\"ds-row-status\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>Solved</span></a>",
+      "css": ".ds-row { display: flex; align-items: center; gap: 1rem; min-height: 4.5rem; padding: 0.875rem 0.75rem; margin: 0 -0.75rem; border-radius: 6px; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; font-family: 'Libre Franklin', system-ui, sans-serif; transition: background-color 150ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-row:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); } .ds-row:focus-visible { outline: 2px solid var(--spot); outline-offset: 2px; } .ds-row-main { flex: 1; min-width: 0; } .ds-row-clue { margin: 0; font-size: 1.125rem; line-height: 1.35; font-weight: 500; letter-spacing: -0.012em; } .ds-row-slot { display: inline-block; width: 0.68em; margin: 0 0.035em; border-bottom: 0.08em solid var(--rule-strong); line-height: 1.1; } .ds-row-date { margin: 0.375rem 0 0; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--ink-3); } .ds-row-status { display: flex; align-items: center; gap: 0.375rem; flex-shrink: 0; font-size: 0.875rem; font-weight: 600; color: var(--spot-ink); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Composing Stick",
+    "overview": "The page is a printer's composing stick. The clue is one line of set type with a five-letter gap in it, and the player's letters are type sorts that drop into that gap. Nothing sits behind the line: no background art, no card, no app chrome beyond a hairline-ruled top bar. Everything that is not the clue exists to help fill it, check it, or share it.\n\nThe world is cool white stock and near-black ink, with one spot ink: the brand teal. Teal means \"this letter is right\". It prints locked letters, the found word, and the correct cells of a result. Depth comes from hairline rules and the pressed edge along the bottom of each sort, never from shadows, glass, or gradients. The layout is dense and single-column, sized for one thumb on a 390px phone, and the desktop view is the same column centered on a wider measure.\n\nMotion is typesetting motion. Sorts set in with a small scale-up, press in when they lock, and shake sideways on a wrong guess. On solve, the gap closes into the finished sentence: the real word space opens inside the answer, the letters ink from black to teal, and a teal rule draws under the hidden word from left to right. Every move eases out and settles. Nothing bounces.",
+    "keyCharacteristics": [
+      "One line of type is the hero; the gap in the clue mirrors the tiles as the player types.",
+      "Cool neutral paper, near-black ink, and a single teal spot ink used for correct letters.",
+      "Hairline 1px rules for structure; the only other depth is a 2px pressed inset edge on the sorts.",
+      "Libre Franklin for everything, DM Serif Display for the wordmark only, tabular figures for every changing number.",
+      "Ease-out settles (`cubic-bezier(0.25, 1, 0.5, 1)`) and no overshoot.",
+      "Light and dark themes share one set of token names and swap values under `data-theme=\"dark\"`."
+    ],
+    "rules": [
+      {
+        "name": "The One Spot Ink Rule",
+        "body": "Teal means a letter is right. It fills locked and solved sorts, colors correct letters in type, and draws the found-word rule; beyond that it appears only as the system focus ring, caret, and selection wash. Buttons, links, headings, icons, and chart bars stay in ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cool Stock Rule",
+        "body": "The paper is cool neutral (`#f6f7f7`), never cream or warm. Raised surfaces are plain white (`#ffffff`) in light mode and a single lighter step (`#1b1e21`) in dark mode.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paired Theme Rule",
+        "body": "Every color is a named custom property on `:root`, redefined under `:root[data-theme=\"dark\"]`. Components use the property, never a raw hex, so both themes come from one component definition.",
+        "section": "colors"
+      },
+      {
+        "name": "The Wordmark-Only Serif Rule",
+        "body": "DM Serif Display sets the wordmark and nothing else. Headings, numbers, and buttons are Libre Franklin.",
+        "section": "typography"
+      },
+      {
+        "name": "The Figures Line Up Rule",
+        "body": "Any number that changes (day number, countdown, stats, guess counts, version) uses `font-variant-numeric: tabular-nums` so digits do not shift.",
+        "section": "typography"
+      },
+      {
+        "name": "The Dateline Follows Rule",
+        "body": "The tracked-caps dateline sits under the clue it dates and carries real data. It is not a label placed above headings.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Dividers are 1px `rule` lines. Borders on controls are 1.5px. The two heavier marks are deliberate: the 2px ink rule under the current nav item and the rule under the found word, which is 0.08em thick.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No Lift Rule",
+        "body": "Nothing floats. No drop shadows, glass, blur, gradients, or background shapes. A dialog is a sheet of raised stock over a scrim.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep the clue as the largest type on the page (26px, 30px at 640px and up) and let the gap sit inside the sentence.",
+      "**Do** use Spot Teal and Spot Ink only for letters that are right, plus the focus ring, caret, and selection wash.",
+      "**Do** separate regions with 1px `rule` hairlines and spacing, not boxes or shadows.",
+      "**Do** keep primary actions full width, 52px tall, in Ink, directly under the stick.",
+      "**Do** give every interactive control a hit area of at least 44px.",
+      "**Do** set every changing number in tabular figures.",
+      "**Do** use the ease-out curve `cubic-bezier(0.25, 1, 0.5, 1)`, keep durations between 120ms and 560ms, and honor reduced motion.",
+      "**Do** define every new color as a custom property with both a light and a `data-theme=\"dark\"` value."
+    ],
+    "donts": [
+      "**Don't** use DM Serif Display anywhere but the wordmark.",
+      "**Don't** add drop shadows, glass or blur, gradients, or background blobs. The only shadow is the 2px inset pressed edge on sorts.",
+      "**Don't** warm the paper toward cream or add a second accent hue.",
+      "**Don't** color buttons, links, headings, icons, or chart bars teal.",
+      "**Don't** round sorts past 6px or turn them into pills or circles.",
+      "**Don't** let any motion overshoot or bounce; scale moves go down and return to 1.",
+      "**Don't** put tracked-caps labels above headings; the dateline sits under the clue it dates."
+    ]
+  }
+}
