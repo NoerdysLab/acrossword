@@ -1,77 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTheme, setTheme as saveTheme } from "@/lib/storage";
+import { setTheme as saveTheme } from "@/lib/storage";
+
+type Theme = "light" | "dark";
 
 export default function ThemeToggle() {
-  const [theme, setThemeState] = useState<"light" | "dark">("light");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-    const saved = getTheme();
-    if (saved) {
-      setThemeState(saved);
-      document.documentElement.setAttribute("data-theme", saved);
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setThemeState("dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-    }
+    setThemeState(document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light");
   }, []);
 
   const toggle = () => {
-    const next = theme === "light" ? "dark" : "light";
+    const next: Theme = theme === "dark" ? "light" : "dark";
     setThemeState(next);
     saveTheme(next);
     document.documentElement.setAttribute("data-theme", next);
   };
 
-  if (!mounted) return <div style={{ width: 40, height: 40 }} />;
+  const dark = theme === "dark";
+  const icon = {
+    width: 22,
+    height: 22,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.75,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
 
   return (
     <button
+      type="button"
+      className="icon-btn"
       onClick={toggle}
-      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-      className="glass-theme-btn"
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      style={{ visibility: theme ? "visible" : "hidden" }}
     >
-      <div className="glass-theme-icon-wrap" data-theme-state={theme}>
-        {/* Sun */}
-        <svg
-          className="glass-theme-icon glass-theme-sun"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="5" />
-          <line x1="12" y1="1" x2="12" y2="3" />
-          <line x1="12" y1="21" x2="12" y2="23" />
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-          <line x1="1" y1="12" x2="3" y2="12" />
-          <line x1="21" y1="12" x2="23" y2="12" />
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+      <span className="relative block" style={{ width: 22, height: 22 }} aria-hidden="true">
+        <svg {...icon} className={`theme-icon${dark ? "" : " theme-icon--out"}`}>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4" />
         </svg>
-        {/* Moon */}
-        <svg
-          className="glass-theme-icon glass-theme-moon"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        <svg {...icon} className={`theme-icon${dark ? " theme-icon--out" : ""}`}>
+          <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.6 6.6 0 0 0 10.7 10.7z" />
         </svg>
-      </div>
+      </span>
     </button>
   );
 }

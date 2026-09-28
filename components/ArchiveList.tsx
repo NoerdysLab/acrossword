@@ -4,102 +4,105 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getSolvedData, type SolvedEntry } from "@/lib/storage";
 import { PLAYABLE_WINDOW } from "@/lib/constants";
+import { puzzleDateLabel } from "@/lib/dates";
 
 interface ArchiveListProps {
   todayDay: number;
   puzzles: { day: number; clue: string; length: number }[];
 }
 
+const icon = {
+  width: 20,
+  height: 20,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.75,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  "aria-hidden": true,
+};
+
+function ClueText({ clue }: { clue: string }) {
+  const [before, after = ""] = clue.split("_ _ _ _ _");
+  return (
+    <>
+      {before}
+      <span className="sr-only">[five-letter gap]</span>
+      <span aria-hidden="true" style={{ letterSpacing: "0.12em", color: "var(--ink-3)" }}>
+        _____
+      </span>
+      {after}
+    </>
+  );
+}
+
 export default function ArchiveList({ todayDay, puzzles }: ArchiveListProps) {
-  const [solvedData, setSolvedData] = useState<Record<string, SolvedEntry>>({});
+  const [solved, setSolved] = useState<Record<string, SolvedEntry>>({});
 
   useEffect(() => {
-    setSolvedData(getSolvedData());
+    setSolved(getSolvedData());
   }, []);
 
-  const isPlayable = (day: number) => day >= todayDay - PLAYABLE_WINDOW && day <= todayDay;
-
   return (
-    <div className="w-full space-y-3">
-      {puzzles
+    <ul style={{ borderTop: "1px solid var(--rule)" }}>
+      {[...puzzles]
         .sort((a, b) => b.day - a.day)
-        .map((puzzle) => {
-          const playable = isPlayable(puzzle.day);
-          const entry = solvedData[String(puzzle.day)];
-          const isSolved = entry?.solved;
+        .map((p) => {
+          const playable = p.day >= todayDay - PLAYABLE_WINDOW && p.day <= todayDay;
+          const isSolved = !!solved[String(p.day)]?.solved;
+          const isToday = p.day === todayDay;
 
-          const content = (
-            <div
-              className={`rounded-xl px-5 py-4 transition-all ${
-                playable ? "cursor-pointer hover:scale-[1.01]" : ""
-              }`}
-              style={{
-                backgroundColor: "var(--bg-secondary)",
-                opacity: playable ? 1 : 0.5,
-                borderLeft: isSolved
-                  ? "3px solid var(--accent)"
-                  : "3px solid transparent",
-              }}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-bold" style={{ color: "var(--text)" }}>
-                  Day {puzzle.day}
-                  {puzzle.day === todayDay && (
-                    <span
-                      className="ml-2 text-xs px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: "var(--accent)",
-                        color: "#fff",
-                      }}
-                    >
-                      Today
-                    </span>
-                  )}
-                </span>
-                <span className="text-sm">
-                  {isSolved ? (
-                    <span style={{ color: "var(--accent)" }}>&#10003;</span>
-                  ) : !playable ? (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                  ) : (
-                    <span style={{ color: "var(--text-secondary)" }}>&mdash;</span>
-                  )}
-                </span>
+          const body = (
+            <div className="flex items-center gap-4" style={{ padding: "0.875rem 0", minHeight: "4.5rem" }}>
+              <div className="flex-1 min-w-0">
+                <p className="tabular" style={{ fontSize: "0.8125rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ink-3)" }}>
+                  Day {p.day} · {isToday ? <span style={{ color: "var(--spot-ink)" }}>Today</span> : puzzleDateLabel(p.day)}
+                </p>
+                <p className="truncate" style={{ marginTop: "0.25rem", fontSize: "1rem", fontWeight: 500, color: playable ? "var(--ink)" : "var(--ink-3)" }}>
+                  <ClueText clue={p.clue} />
+                </p>
               </div>
-              <p
-                className="text-sm truncate"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {puzzle.clue}
-              </p>
+              <span className="flex items-center gap-1.5 shrink-0" style={{ fontSize: "0.875rem", fontWeight: 600, color: isSolved ? "var(--spot-ink)" : "var(--ink-3)" }}>
+                {isSolved ? (
+                  <>
+                    <svg {...icon} strokeWidth={2}>
+                      <path d="M5 12.5l4.5 4.5L19 7.5" />
+                    </svg>
+                    Solved
+                  </>
+                ) : playable ? (
+                  <>
+                    Play
+                    <svg {...icon}>
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    <svg {...icon}>
+                      <rect x="5" y="11" width="14" height="9" rx="2" />
+                      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                    Locked
+                  </>
+                )}
+              </span>
             </div>
           );
 
-          if (playable) {
-            return (
-              <Link
-                key={puzzle.day}
-                href={puzzle.day === todayDay ? "/" : `/puzzle/${puzzle.day}`}
-                className="block no-underline hover:opacity-80 transition-opacity"
-              >
-                {content}
-              </Link>
-            );
-          }
-
-          return <div key={puzzle.day}>{content}</div>;
+          return (
+            <li key={p.day} style={{ borderBottom: "1px solid var(--rule)" }}>
+              {playable ? (
+                <Link href={isToday ? "/" : `/puzzle/${p.day}`} className="block archive-row" style={{ textDecoration: "none", color: "inherit" }}>
+                  {body}
+                </Link>
+              ) : (
+                body
+              )}
+            </li>
+          );
         })}
-    </div>
+    </ul>
   );
 }

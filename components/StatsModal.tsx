@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Dialog from "./Dialog";
 import { getStats, type Stats } from "@/lib/storage";
 
 interface StatsModalProps {
@@ -8,87 +9,68 @@ interface StatsModalProps {
   onClose: () => void;
 }
 
+const BUCKETS = ["1", "2", "3", "4", "5+"];
+
 export default function StatsModal({ open, onClose }: StatsModalProps) {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
-    if (open) {
-      setStats(getStats());
-    }
+    if (open) setStats(getStats());
   }, [open]);
 
-  if (!open || !stats) return null;
-
-  const maxGuesses = Math.max(
-    ...Object.values(stats.guessDistribution),
-    1
-  );
-
-  const buckets = ["1", "2", "3", "4", "5+"];
+  const max = stats ? Math.max(...Object.values(stats.guessDistribution), 1) : 1;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-      style={{ backgroundColor: "var(--overlay)" }}
-      onClick={onClose}
-    >
-      <div
-        className="rounded-xl p-6 sm:p-8 w-full animate-fade-in-up"
-        style={{ backgroundColor: "var(--modal-bg)", color: "var(--text)", maxWidth: "480px" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Statistics</h2>
-          <button onClick={onClose} className="p-1" aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
+    <Dialog open={open && !!stats} onClose={onClose} title="Statistics">
+      {stats && (
+        <>
+          <dl className="grid grid-cols-3" style={{ borderTop: "1px solid var(--rule)", borderBottom: "1px solid var(--rule)" }}>
+            {[
+              ["Solved", stats.totalSolved],
+              ["Streak", stats.currentStreak],
+              ["Best streak", stats.maxStreak],
+            ].map(([label, value], i) => (
+              <div key={label} style={{ padding: "0.875rem 0", paddingLeft: i ? "1rem" : 0, borderLeft: i ? "1px solid var(--rule)" : undefined }}>
+                <dt style={{ fontSize: "0.8125rem", color: "var(--ink-3)" }}>{label}</dt>
+                <dd className="tabular" style={{ fontSize: "1.75rem", fontWeight: 700, lineHeight: 1.2 }}>
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-        <div className="grid grid-cols-3 gap-4 mb-6 text-center">
-          <div>
-            <div className="text-3xl font-bold">{stats.totalSolved}</div>
-            <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Solved</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold">{stats.currentStreak}</div>
-            <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Current Streak</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold">{stats.maxStreak}</div>
-            <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Max Streak</div>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--text-secondary)" }}>
-            Guess Distribution
-          </h3>
-          <div className="space-y-2">
-            {buckets.map((bucket) => {
-              const count = stats.guessDistribution[bucket] || 0;
-              const width = maxGuesses > 0 ? Math.max((count / maxGuesses) * 90, 8) : 8;
-              return (
-                <div key={bucket} className="flex items-center gap-2">
-                  <span className="text-sm w-5 text-right">{bucket}</span>
-                  <div
-                    className="h-6 rounded flex items-center justify-end px-2 text-xs font-bold text-white transition-all"
-                    style={{
-                      width: `${width}%`,
-                      backgroundColor: count > 0 ? "var(--accent)" : "var(--tile-border)",
-                      minWidth: "24px",
-                    }}
-                  >
-                    {count}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
+          <h3 style={{ marginTop: "1.25rem", fontSize: "0.9375rem", fontWeight: 600 }}>Guesses per solve</h3>
+          {stats.totalSolved === 0 ? (
+            <p style={{ marginTop: "0.5rem", fontSize: "0.9375rem", color: "var(--ink-2)" }}>
+              Solve today&apos;s clue to start your streak.
+            </p>
+          ) : (
+            <ul style={{ marginTop: "0.625rem" }} className="flex flex-col gap-2">
+              {BUCKETS.map((b) => {
+                const count = stats.guessDistribution[b] || 0;
+                return (
+                  <li key={b} className="grid items-center tabular" style={{ gridTemplateColumns: "1.75rem 1fr 2rem", gap: "0.5rem", fontSize: "0.9375rem" }}>
+                    <span style={{ color: "var(--ink-2)" }}>{b}</span>
+                    <span style={{ height: 10, borderRadius: 2, background: "var(--rule)" }}>
+                      <span
+                        style={{
+                          display: "block",
+                          height: "100%",
+                          borderRadius: 2,
+                          background: "var(--spot)",
+                          transformOrigin: "left center",
+                          transform: `scaleX(${count / max})`,
+                        }}
+                      />
+                    </span>
+                    <span style={{ textAlign: "right", fontWeight: 600, color: count ? "var(--ink)" : "var(--ink-3)" }}>{count}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
+      )}
+    </Dialog>
   );
 }

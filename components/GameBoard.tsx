@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Tile from "./Tile";
-import Confetti from "./Confetti";
-import Toast from "./Toast";
+import Tile, { type SortAnim, type SortState } from "./Tile";
+import ClueLine, { type Slot } from "./ClueLine";
+import NextClue from "./NextClue";
 import DemoModal from "./DemoModal";
+import { puzzleDateLabel } from "@/lib/dates";
 import {
   getSolvedData,
   getCurrentGame,
@@ -22,126 +23,88 @@ interface GameBoardProps {
   length: number;
 }
 
-type TileState = "empty" | "typing" | "wrong" | "correct" | "solved";
+type Phase = "idle" | "checking" | "wrong" | "solving" | "solved";
 
-// Find where the answer letters span in the completed sentence.
-function findAnswerSpan(
-  sentence: string,
-  answerLength: number,
-  clue: string
-) {
-  const uscoreIdx = clue.indexOf("_ _ _ _ _");
-  if (uscoreIdx === -1) return null;
+const SUBMIT_FORM =
+  "https://docs.google.com/forms/d/e/1FAIpQLSfI5c6NX5fZxPnIY5SHWYrnubzfISLBY8TVftSvGuoVALPC6A/viewform?usp=publish-editor";
 
-  const prefixLen = clue.slice(0, uscoreIdx).length;
-  let end = prefixLen;
+function findAnswerSpan(sentence: string, answerLength: number, clue: string) {
+  const gapIdx = clue.indexOf("_ _ _ _ _");
+  if (gapIdx === -1) return null;
+  const start = gapIdx;
+  let end = start;
   let consumed = 0;
   while (end < sentence.length && consumed < answerLength) {
-    if (sentence[end] === " ") {
-      end++;
-      continue;
-    }
-    consumed++;
+    if (sentence[end] !== " ") consumed++;
     end++;
   }
-
-  if (consumed === answerLength) {
-    return { start: prefixLen, end };
-  }
-  return null;
+  return consumed === answerLength ? { start, end } : null;
 }
 
-// Derive the answer from the completed sentence by extracting
-// the non-space characters from the answer span.
-function deriveAnswer(
-  sentence: string,
-  answerLength: number,
-  clue: string
-): string {
+function deriveAnswer(sentence: string, answerLength: number, clue: string): string {
   const span = findAnswerSpan(sentence, answerLength, clue);
   if (!span) return "";
-  const middle = sentence.slice(span.start, span.end);
-  return middle
-    .replace(/\s/g, "")
-    .toUpperCase();
+  return sentence.slice(span.start, span.end).replace(/\s/g, "").toUpperCase();
 }
 
-export default function GameBoard({
-  day,
-  clue,
-  completedSentence,
-  length,
-}: GameBoardProps) {
-  const [currentGuess, setCurrentGuess] = useState("");
-  const [tileStates, setTileStates] = useState<TileState[]>(
-    Array(length).fill("empty")
-  );
-  const [previousGuesses, setPreviousGuesses] = useState<string[]>([]);
-  const [solved, setSolved] = useState(false);
+// Locked letters stay in place; typed letters fill the open positions in order.
+function placeLetters(typed: string, locked: string[]): string[] {
+  const out = [...locked];
+  let t = 0;
+  for (let i = 0; i < out.length; i++) {
+    if (!out[i] && t < typed.length) out[i] = typed[t++].toUpperCase();
+  }
+  return out;
+}
+
+export default function GameBoard({ day, clue, completedSentence, length }: GameBoardProps) {
+  const answer = deriveAnswer(completedSentence, length, clue);
+  const answerSpan = findAnswerSpan(completedSentence, length, clue);
+
+  const [typed, setTyped] = useState("");
+  const [locked, setLocked] = useState<string[]>(() => Array(length).fill(""));
+  const [justLocked, setJustLocked] = useState<number[]>([]);
+  const [guesses, setGuesses] = useState<string[]>([]);
+  const [phase, setPhase] = useState<Phase>("idle");
   const [solvedAnswer, setSolvedAnswer] = useState("");
   const [guessCount, setGuessCount] = useState(0);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [showSentence, setShowSentence] = useState(false);
-  const [alreadySolved, setAlreadySolved] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Locked-in correct letters (Wordle-style). Array of length, empty string means not locked.
-  const [lockedLetters, setLockedLetters] = useState<string[]>(
-    Array(length).fill("")
-  );
-
-  // Timer state
-  const startTimeRef = useRef<number | null>(null);
-
-  // Toast state
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-
-  // Demo modal for first-time visitors
+  const [animateSolve, setAnimateSolve] = useState(false);
+  const [status, setStatus] = useState("");
+  const [copied, setCopied] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+  const startTimeRef = useRef<number | null>(null);
   const submittingRef = useRef(false);
 
-  // Derived answer for client-side letter checking
-  const answer = deriveAnswer(completedSentence, length, clue);
+  const solved = phase === "solving" || phase === "solved";
+  const openCount = locked.filter((l) => !l).length;
+  const ready = !solved && typed.length === openCount && phase !== "checking";
 
-  // Load saved state
   useEffect(() => {
-    // Show demo for first-time visitors
-    if (!hasSeenDemo()) {
-      setShowDemo(true);
-    }
+    const firstVisit = !hasSeenDemo();
+    if (firstVisit) setShowDemo(true);
 
-    const solvedData = getSolvedData();
-    const entry = solvedData[String(day)];
+    const entry = getSolvedData()[String(day)];
     if (entry?.solved) {
-      setSolved(true);
-      setAlreadySolved(true);
+      setPhase("solved");
       setGuessCount(entry.guesses);
-      const ans = entry.answer || deriveAnswer(completedSentence, length, clue);
-      setSolvedAnswer(ans);
-      if (entry.guessHistory) setPreviousGuesses(entry.guessHistory.slice(0, -1));
-      setTileStates(Array(length).fill("solved"));
-      setShowSentence(true);
+      setSolvedAnswer(entry.answer || deriveAnswer(completedSentence, length, clue));
+      if (entry.guessHistory) setGuesses(entry.guessHistory.slice(0, -1));
       return;
     }
 
     const current = getCurrentGame();
     if (current && current.day === day) {
-      setPreviousGuesses(current.guesses);
+      setGuesses(current.guesses);
       if (current.startTime) startTimeRef.current = current.startTime;
-      // Restore locked letters from saved state
-      if (current.lockedLetters) {
-        setLockedLetters(current.lockedLetters);
-        // Set tile states for locked letters
-        const states: TileState[] = Array(length).fill("empty");
-        current.lockedLetters.forEach((letter: string, i: number) => {
-          if (letter) states[i] = "correct";
-        });
-        setTileStates(states);
-      }
+      if (current.lockedLetters) setLocked(current.lockedLetters);
     }
-  }, [day, length]);
+
+    if (!firstVisit && window.matchMedia("(pointer: fine)").matches) {
+      inputRef.current?.focus({ preventScroll: true });
+    }
+  }, [day, length, clue, completedSentence]);
 
   const handleDemoClose = useCallback(() => {
     setShowDemo(false);
@@ -150,457 +113,298 @@ export default function GameBoard({
   }, []);
 
   const focusInput = useCallback(() => {
-    if (!solved) {
-      inputRef.current?.focus();
-    }
+    if (!solved) inputRef.current?.focus();
   }, [solved]);
 
-  // Record first interaction for timer
   const ensureTimerStarted = useCallback(() => {
     if (startTimeRef.current !== null) return;
     startTimeRef.current = Date.now();
     const current = getCurrentGame();
-    if (current && current.day === day) {
-      setCurrentGame({ ...current, startTime: startTimeRef.current });
-    } else {
-      setCurrentGame({ day, guesses: [], startTime: startTimeRef.current });
-    }
+    setCurrentGame(
+      current && current.day === day
+        ? { ...current, startTime: startTimeRef.current }
+        : { day, guesses: [], startTime: startTimeRef.current }
+    );
   }, [day]);
 
-  // Build tile states accounting for locked letters and current guess
-  const buildTileStates = useCallback(
-    (guess: string, locked: string[]): TileState[] => {
-      const states: TileState[] = Array(length).fill("empty");
-      let typedIdx = 0;
+  const submitGuess = useCallback(async () => {
+    if (submittingRef.current || !ready) return;
+    submittingRef.current = true;
+    const full = placeLetters(typed, locked).join("");
+    setPhase("checking");
+    setStatus("");
+
+    try {
+      const res = await fetch("/api/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ day, guess: full }),
+      });
+      const data = await res.json();
+
+      if (data.correct) {
+        const total = guesses.length + 1;
+        const elapsed = startTimeRef.current ? Date.now() - startTimeRef.current : null;
+        markSolved(day, total, full, 0, elapsed, [...guesses, full]);
+        setCurrentGame(null);
+        setGuessCount(total);
+        setSolvedAnswer(full);
+        setTyped("");
+        setAnimateSolve(true);
+        setPhase("solving");
+        setStatus(`Solved in ${total} ${total === 1 ? "guess" : "guesses"}.`);
+        setTimeout(() => setPhase("solved"), 520);
+        submittingRef.current = false;
+        return;
+      }
+
+      const newLocked = [...locked];
+      const fresh: number[] = [];
       for (let i = 0; i < length; i++) {
-        if (locked[i]) {
-          states[i] = "correct";
-        } else if (typedIdx < guess.length) {
-          states[i] = "typing";
-          typedIdx++;
+        if (!newLocked[i] && full[i] === answer[i]) {
+          newLocked[i] = answer[i];
+          fresh.push(i);
         }
       }
-      return states;
-    },
-    [length]
-  );
+      const newGuesses = [...guesses, full];
+      setGuesses(newGuesses);
+      setPhase("wrong");
+      setStatus(
+        fresh.length === 0
+          ? locked.some(Boolean)
+            ? "Not it. No new letters locked in."
+            : "Not it. No letters in the right spot."
+          : `Not it. ${fresh.length} ${fresh.length === 1 ? "letter" : "letters"} locked in.`
+      );
 
-  // Build full guess string for submission: merge locked + typed into contiguous string
-  const buildFullGuess = useCallback(
-    (typed: string, locked: string[]): string => {
-      let result = "";
-      let typedIdx = 0;
-      for (let i = 0; i < length; i++) {
-        if (locked[i]) {
-          result += locked[i];
-        } else if (typedIdx < typed.length) {
-          result += typed[typedIdx];
-          typedIdx++;
-        }
-      }
-      return result;
-    },
-    [length]
-  );
-
-  // Build display array: locked letters at their positions, typed letters filling unlocked slots
-  const buildDisplayLetters = useCallback(
-    (typed: string, locked: string[]): string[] => {
-      const display: string[] = Array(length).fill("");
-      let typedIdx = 0;
-      for (let i = 0; i < length; i++) {
-        if (locked[i]) {
-          display[i] = locked[i];
-        } else if (typedIdx < typed.length) {
-          display[i] = typed[typedIdx];
-          typedIdx++;
-        }
-      }
-      return display;
-    },
-    [length]
-  );
-
-  // Number of unlocked positions
-  const unlockedCount = lockedLetters.filter((l) => !l).length;
-
-  const submitGuess = useCallback(
-    async (guess: string) => {
-      if (submittingRef.current) return;
-      submittingRef.current = true;
-
-      const fullGuess = buildFullGuess(guess, lockedLetters);
-
-      try {
-        const res = await fetch("/api/check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ day, guess: fullGuess }),
-        });
-        const data = await res.json();
-
-        if (data.correct) {
-          const totalGuesses = previousGuesses.length + 1;
-          const elapsedMs = startTimeRef.current
-            ? Date.now() - startTimeRef.current
-            : null;
-          setGuessCount(totalGuesses);
-          setSolved(true);
-          setSolvedAnswer(fullGuess.toUpperCase());
-          setTileStates(Array(length).fill("correct"));
-          setShowConfetti(true);
-          const allGuesses = [...previousGuesses, fullGuess.toUpperCase()];
-          markSolved(day, totalGuesses, fullGuess, 0, elapsedMs, allGuesses);
-          setCurrentGame(null);
-
-          setTimeout(() => setShowSentence(true), 800);
-          setTimeout(() => setShowConfetti(false), 2500);
-        } else {
-          // Wordle-style: lock in correct letters
-          const newLocked = [...lockedLetters];
-          const fullUpper = fullGuess.toUpperCase();
-          for (let i = 0; i < length; i++) {
-            if (!newLocked[i] && fullUpper[i] === answer[i]) {
-              newLocked[i] = answer[i];
-            }
-          }
-
-          // Shake only unlocked tiles; keep locked tiles green
-          const wrongStates: TileState[] = Array(length).fill("wrong");
-          for (let i = 0; i < length; i++) {
-            if (lockedLetters[i]) {
-              wrongStates[i] = "correct";
-            }
-          }
-          setTileStates(wrongStates);
-          const newGuesses = [
-            ...previousGuesses,
-            fullGuess.toUpperCase(),
-          ];
-          setPreviousGuesses(newGuesses);
-
-          setTimeout(() => {
-            setLockedLetters(newLocked);
-            setCurrentGuess("");
-            setTileStates(buildTileStates("", newLocked));
-            inputRef.current?.focus();
-            submittingRef.current = false;
-
-            // Save state with locked letters
-            setCurrentGame({
-              day,
-              guesses: newGuesses,
-              startTime: startTimeRef.current,
-              lockedLetters: newLocked,
-            });
-          }, 400);
-          return;
-        }
-      } catch {
-        setTileStates(buildTileStates(guess, lockedLetters));
-      }
+      setTimeout(() => {
+        setLocked(newLocked);
+        setJustLocked(fresh);
+        setTyped("");
+        setPhase("idle");
+        submittingRef.current = false;
+        inputRef.current?.focus();
+        setCurrentGame({ day, guesses: newGuesses, startTime: startTimeRef.current, lockedLetters: newLocked });
+      }, 340);
+    } catch {
+      setPhase("idle");
+      setStatus("Couldn't check that guess. Check your connection and try again.");
       submittingRef.current = false;
-    },
-    [day, length, previousGuesses, lockedLetters, answer, buildFullGuess, buildTileStates]
-  );
+    }
+  }, [ready, typed, locked, day, guesses, length, answer]);
 
   const handleInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (solved) return;
+      if (solved || phase === "checking") return;
       ensureTimerStarted();
-      const val = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, unlockedCount);
-      setCurrentGuess(val);
-      setTileStates(buildTileStates(val, lockedLetters));
+      const val = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, openCount).toUpperCase();
+      setTyped(val);
+      setJustLocked([]);
+      if (phase === "wrong") setPhase("idle");
     },
-    [solved, unlockedCount, lockedLetters, buildTileStates, ensureTimerStarted]
+    [solved, phase, openCount, ensureTimerStarted]
   );
 
-  const handleSubmit = useCallback(
+  const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key !== "Enter" || solved) return;
-      if (currentGuess.length !== unlockedCount) return;
-      submitGuess(currentGuess);
+      if (e.key === "Enter") submitGuess();
     },
-    [currentGuess, unlockedCount, solved, submitGuess]
+    [submitGuess]
   );
 
-  // Build share text with Wordle-style emoji grid
   const buildShareText = useCallback(() => {
     const stats = getStats();
-    const isDark = typeof document !== "undefined" &&
-      document.documentElement.getAttribute("data-theme") === "dark";
-    const wrongEmoji = isDark ? "⬛" : "⬜";
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
+    const miss = dark ? "⬛" : "⬜";
+    const line = (g: string) =>
+      Array.from({ length }, (_, i) => (g[i]?.toUpperCase() === answer[i] ? "🟦" : miss)).join("");
+    return [
+      `ACROSSword — Day ${day}`,
+      ...[...guesses, solvedAnswer].map(line),
+      `Streak: ${stats.currentStreak}`,
+      "ACROSSword.org",
+    ].join("\n");
+  }, [day, length, answer, guesses, solvedAnswer]);
 
-    // Build emoji line for a guess
-    const emojiLine = (guess: string): string => {
-      return Array.from({ length })
-        .map((_, i) => guess[i]?.toUpperCase() === answer[i] ? "🟦" : wrongEmoji)
-        .join("");
-    };
-
-    let text = `ACROSSword — Day ${day}\n`;
-
-    // All previous (wrong) guesses + the final correct guess
-    const allGuesses = [...previousGuesses, solvedAnswer];
-    for (const guess of allGuesses) {
-      text += emojiLine(guess) + "\n";
-    }
-
-    text += `Streak: ${stats.currentStreak}\n`;
-    text += `ACROSSword.org`;
-    return text;
-  }, [day, length, answer, previousGuesses, solvedAnswer]);
-
-  // Copy handler
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(buildShareText());
-      setToastMessage("Copied!");
-      setToastVisible(true);
+      setCopied(true);
+      setStatus("Result copied.");
+      setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard failed
+      setStatus("Couldn't copy. Your browser blocked clipboard access.");
     }
   }, [buildShareText]);
 
-  // Build display letters as array so locked letters stay at correct positions
-  const displayLetters: string[] = solved
-    ? (solvedAnswer || answer).split("")
-    : buildDisplayLetters(currentGuess, lockedLetters);
+  // ----- Derived view state -----
 
-  const answerSpan = findAnswerSpan(completedSentence, length, clue);
+  const letters = solved ? (solvedAnswer || answer).split("") : placeLetters(typed, locked);
+  const nextIndex = solved ? -1 : letters.findIndex((l) => !l);
 
-  // Completed sentence with highlighted answer portion
-  const renderCompletedSentence = () => {
-    if (!answerSpan) return <span>{completedSentence}</span>;
+  const sorts: { letter: string; state: SortState; anim: SortAnim; delay: number }[] = letters.map((letter, i) => {
+    if (solved) {
+      return {
+        letter,
+        state: "solved",
+        anim: animateSolve && !locked[i] ? "press" : "none",
+        delay: animateSolve ? i * 60 : 0,
+      };
+    }
+    if (locked[i]) {
+      return { letter, state: "locked", anim: justLocked.includes(i) ? "press" : "none", delay: 0 };
+    }
+    if (phase === "wrong") return { letter, state: "typed", anim: "shake", delay: 0 };
+    if (letter) return { letter, state: "typed", anim: "set", delay: 0 };
+    return { letter: "", state: i === nextIndex ? "next" : "empty", anim: "none", delay: 0 };
+  });
 
-    const before = completedSentence.slice(0, answerSpan.start);
-    const highlighted = completedSentence.slice(
-      answerSpan.start,
-      answerSpan.end
-    );
-    const after = completedSentence.slice(answerSpan.end);
+  const slots: Slot[] = sorts.map((s) => ({
+    letter: s.letter,
+    state: s.state === "solved" ? "locked" : s.state,
+  }));
 
-    return (
-      <>
-        <span>{before}</span>
-        <span style={{ color: "var(--accent)", fontWeight: 700 }}>
-          {highlighted}
-        </span>
-        <span>{after}</span>
-      </>
-    );
-  };
+  const hint =
+    openCount === length
+      ? "Tap the tiles and type a 5-letter word."
+      : `Type the ${openCount} missing ${openCount === 1 ? "letter" : "letters"}.`;
 
-  // Clue with highlighted underscores
-  const renderClue = () =>
-    clue.split(/(_ _ _ _ _)/).map((part, i) =>
-      part === "_ _ _ _ _" ? (
-        <span key={i} style={{ color: "var(--accent)", fontWeight: 700 }}>
-          {part}
-        </span>
-      ) : (
-        <span key={i}>{part}</span>
-      )
-    );
+  const resultRows = [...guesses, solvedAnswer || answer];
 
   return (
-    <div
-      className="flex flex-col items-center gap-8 w-full"
-      onClick={focusInput}
-    >
-      {/* Puzzle number */}
-      <div
-        className="text-sm font-semibold tracking-wide uppercase"
-        style={{ color: "var(--text-secondary)" }}
-      >
-        Day #{day}
-      </div>
-
-      {/* Clue or Completed Sentence */}
-      <div
-        className="text-lg sm:text-xl text-center leading-relaxed max-w-lg px-4"
-        style={{
-          fontFamily: "'Libre Franklin', sans-serif",
-          color: "var(--text)",
-          minHeight: "3em",
-        }}
-      >
-        {showSentence ? (
-          <span
-            className={!alreadySolved ? "sentence-reveal" : ""}
-            style={{ display: "inline-block" }}
-          >
-            {renderCompletedSentence()}
-          </span>
-        ) : (
-          <span
-            className="animate-fade-in-up"
-            style={{ display: "inline-block" }}
-          >
-            {renderClue()}
-          </span>
-        )}
-      </div>
-
-      {/* Tiles — always visible */}
-      <div
-        className="relative flex gap-2 animate-fade-in-up"
-        style={{ animationDelay: "100ms" }}
-      >
-        {Array.from({ length }).map((_, i) => (
-          <Tile
-            key={i}
-            index={i}
-            letter={displayLetters[i] || ""}
-            state={tileStates[i]}
-            animationDelay={tileStates[i] === "correct" ? i * 100 : 0}
-          />
-        ))}
-        {showConfetti && <Confetti />}
-      </div>
-
-      {/* Hidden input */}
-      {!solved && (
-        <input
-          ref={inputRef}
-          type="text"
-          value={currentGuess}
-          onChange={handleInput}
-          onKeyDown={handleSubmit}
-          autoComplete="off"
-          autoCapitalize="characters"
-          autoCorrect="off"
-          spellCheck={false}
-          data-form-type="other"
-          data-lpignore="true"
-          name="acrossword-guess"
-          id="acrossword-guess"
-          className="game-input"
-          aria-label="Type your guess"
+    <div className="flex flex-col w-full">
+      <section aria-label={`Day ${day} clue`} onClick={focusInput} style={{ cursor: solved ? "default" : "text" }}>
+        <ClueLine
+          as="h1"
+          clue={clue}
+          slots={slots}
+          solved={phase === "solved" || (phase === "solving" && !animateSolve) ? (answerSpan ? { sentence: completedSentence, ...answerSpan } : null) : null}
+          animate={animateSolve}
         />
-      )}
+        <p className="tabular" style={{ marginTop: "0.75rem", fontSize: "0.8125rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ink-3)" }}>
+          Day {day} · {puzzleDateLabel(day)}
+        </p>
 
-      {/* Guess button */}
+        <div className="stick" aria-hidden="true" style={{ marginTop: "1.75rem" }}>
+          {sorts.map((s, i) => (
+            <Tile key={`${i}-${s.anim}-${guesses.length}`} letter={s.letter} state={s.state} anim={s.anim} delay={s.delay} />
+          ))}
+        </div>
+      </section>
+
       {!solved && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (currentGuess.length === unlockedCount) {
-              submitGuess(currentGuess);
-            }
-          }}
-          disabled={currentGuess.length !== unlockedCount}
-          className="w-full rounded-lg text-base font-semibold transition-colors"
-          style={{
-            maxWidth: `${length * 4.5}rem`,
-            padding: "0.75rem 2rem",
-            backgroundColor: currentGuess.length === unlockedCount ? "var(--accent)" : "var(--bg-secondary)",
-            color: currentGuess.length === unlockedCount ? "#ffffff" : "var(--text-secondary)",
-            opacity: currentGuess.length === unlockedCount ? 1 : 0.5,
-            cursor: currentGuess.length === unlockedCount ? "pointer" : "default",
-          }}
-        >
-          Submit
-        </button>
-      )}
-
-      {/* Prompt to type */}
-      {!solved &&
-        previousGuesses.length === 0 &&
-        currentGuess.length === 0 && (
-          <p
-            className="text-sm animate-fade-in-up"
-            style={{
-              color: "var(--text-secondary)",
-              animationDelay: "200ms",
-            }}
-          >
-            Type your guess
-          </p>
-        )}
-
-      {/* Success message + Share */}
-      {solved && showSentence && (
-        <div
-          className={`flex flex-col items-center text-center ${alreadySolved ? "" : "animate-fade-in-up"}`}
-          style={{ animationDelay: alreadySolved ? "0ms" : "200ms" }}
-        >
-          <p className="text-lg font-bold" style={{ color: "var(--accent)" }}>
-            Solved!
-          </p>
-          <p
-            className="text-sm mt-1"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            {guessCount === 1
-              ? "Got it in 1 guess!"
-              : `Got it in ${guessCount} guesses`}
-          </p>
+        <>
+          <input
+            ref={inputRef}
+            type="text"
+            value={typed}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            autoComplete="off"
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="go"
+            data-form-type="other"
+            data-lpignore="true"
+            name="acrossword-guess"
+            id="acrossword-guess"
+            className="game-input"
+            aria-label={`Your guess. ${hint}`}
+          />
           <button
+            type="button"
+            className="btn btn--ink w-full"
+            style={{ marginTop: "1rem" }}
             onClick={(e) => {
               e.stopPropagation();
-              handleCopy();
+              submitGuess();
             }}
-            className="mt-3 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-colors"
-            style={{
-              backgroundColor: "var(--bg-secondary)",
-              color: "var(--text-secondary)",
-            }}
+            disabled={!ready}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-            Copy results
+            {phase === "checking" ? "Checking…" : "Submit"}
           </button>
-          <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSfI5c6NX5fZxPnIY5SHWYrnubzfISLBY8TVftSvGuoVALPC6A/viewform?usp=publish-editor"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="animate-fade-in-up text-sm mt-3"
-            style={{
-              color: "var(--text-secondary)",
-              animationDelay: alreadySolved ? "0ms" : "600ms",
-              textDecoration: "underline",
-              textUnderlineOffset: "2px",
-            }}
-          >
-            Submit your own ACROSSword
-          </a>
-        </div>
+          <p aria-hidden="true" style={{ marginTop: "0.875rem", minHeight: "1.25rem", fontSize: "0.9375rem", color: status ? "var(--ink-2)" : "var(--ink-3)" }}>
+            {status || (guesses.length === 0 && typed.length === 0 ? hint : "")}
+          </p>
+
+          {guesses.length > 0 && (
+            <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid var(--rule)" }}>
+              <h2 style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--ink-2)" }}>
+                Your guesses <span className="tabular" style={{ color: "var(--ink-3)", fontWeight: 500 }}>{guesses.length}</span>
+              </h2>
+              <ol className="flex flex-wrap" style={{ gap: "0.5rem 1.25rem", marginTop: "0.5rem" }}>
+                {guesses.map((g, gi) => (
+                  <li key={gi} style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "0.14em", color: "var(--ink-3)" }}>
+                    {g.split("").map((ch, i) => (
+                      <span key={i} style={ch === answer[i] ? { color: "var(--spot-ink)", fontWeight: 700 } : undefined}>
+                        {ch}
+                      </span>
+                    ))}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Previous guesses */}
-      {previousGuesses.length > 0 && !solved && (
-        <div className="w-full max-w-xs">
-          <div
-            className="text-xs font-semibold uppercase tracking-wide mb-2"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Previous guesses
+      {phase === "solved" && (
+        <section aria-label="Result" className={animateSolve ? "fade-up" : undefined} style={{ marginTop: "2rem", animationDelay: animateSolve ? "420ms" : undefined }}>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 700, letterSpacing: "-0.01em" }}>
+                Solved in {guessCount} {guessCount === 1 ? "guess" : "guesses"}
+              </h2>
+              <div style={{ marginTop: "0.25rem" }}>
+                <NextClue />
+              </div>
+            </div>
+            <div aria-label={`Result grid, ${resultRows.length} ${resultRows.length === 1 ? "row" : "rows"}`} role="img" className="flex flex-col" style={{ gap: "3px" }}>
+              {resultRows.map((g, r) => (
+                <div key={r} className="flex" style={{ gap: "3px" }}>
+                  {Array.from({ length }, (_, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 2,
+                        background: g[i]?.toUpperCase() === answer[i] ? "var(--spot)" : "var(--rule-strong)",
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {previousGuesses.map((g, i) => (
-              <span
-                key={i}
-                className="text-sm px-3 py-1 rounded-full"
-                style={{
-                  backgroundColor: "var(--bg-secondary)",
-                  color: "var(--text-secondary)",
-                }}
-              >
-                {g}
-              </span>
-            ))}
-          </div>
-        </div>
+
+          <button type="button" className="btn btn--ink w-full" style={{ marginTop: "1.25rem" }} onClick={handleCopy}>
+            {copied ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+              </svg>
+            )}
+            {copied ? "Copied" : "Copy result"}
+          </button>
+
+          <p style={{ marginTop: "1.25rem", fontSize: "0.9375rem", color: "var(--ink-2)" }}>
+            Have a sentence that hides a word?{" "}
+            <a href={SUBMIT_FORM} target="_blank" rel="noopener noreferrer" style={{ color: "var(--ink)", fontWeight: 600, textDecoration: "underline" }}>
+              Submit your own clue
+            </a>
+          </p>
+        </section>
       )}
 
-      <Toast
-        message={toastMessage}
-        visible={toastVisible}
-        onDone={() => setToastVisible(false)}
-      />
+      <p className="sr-only" role="status" aria-live="polite">
+        {status}
+      </p>
 
       <DemoModal open={showDemo} onClose={handleDemoClose} />
     </div>
