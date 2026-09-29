@@ -162,7 +162,9 @@ a {
 
 .slot {
   display: inline-block;
-  width: 0.68em;
+  min-width: 0.68em;
+  padding: 0 0.04em;
+  box-sizing: border-box;
   margin: 0 0.035em;
   border-bottom: 0.08em solid var(--rule-strong);
   text-align: center;
